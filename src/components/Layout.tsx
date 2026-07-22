@@ -17,7 +17,7 @@ export function Layout() {
           <img
             src={logoDark}
             alt="FI Project Tracker"
-            className="h-8 w-auto"
+            className="h-12 w-auto sm:h-14"
           />
         </Link>
 

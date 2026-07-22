@@ -19,15 +19,29 @@ export function PortfolioPage() {
   return (
     <div className="h-full overflow-y-auto fi-scroll">
       <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8">
-        <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-extrabold text-navy-900">
-              Project Portfolio
+            <h1 className="text-3xl font-extrabold tracking-tight text-navy-900 sm:text-4xl">
+              The{' '}
+              <span className="bg-gradient-to-r from-sunburst-500 to-maroon-600 bg-clip-text text-transparent">
+                Progress
+              </span>{' '}
+              Tracker
             </h1>
-            <p className="mt-1 text-sm text-navy-400">
+            <p className="mt-1.5 text-sm text-navy-400">
               All cohort projects, their current phase, and who's working on
               each.
             </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-navy-100 bg-white px-3 py-1 text-xs font-semibold text-navy-700 shadow-sm">
+                <span className="h-2 w-2 rounded-full bg-sunburst-500" />
+                Technical Specialist · Caleb
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-navy-100 bg-white px-3 py-1 text-xs font-semibold text-navy-700 shadow-sm">
+                <span className="h-2 w-2 rounded-full bg-maroon-600" />
+                Business Analyst · Zama
+              </span>
+            </div>
           </div>
           <button
             onClick={() => void copyAllReports()}

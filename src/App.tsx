@@ -12,8 +12,9 @@ export default function App() {
     <ToastProvider>
       <AuthProvider>
         <Routes>
-          <Route path="/login" element={<AuthPage mode="login" />} />
-          <Route path="/signup" element={<AuthPage mode="signup" />} />
+          <Route path="/login" element={<AuthPage />} />
+          {/* Signup is disabled — this is a single-account tool. */}
+          <Route path="/signup" element={<Navigate to="/login" replace />} />
 
           <Route
             element={
