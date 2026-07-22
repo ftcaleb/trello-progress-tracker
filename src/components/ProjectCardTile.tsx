@@ -11,12 +11,14 @@ export function ProjectCardTile({
   progress,
   interns,
   allInterns,
+  reportCount,
   onToggleAssign,
 }: {
   project: Project
   progress: ProjectProgress
   interns: Intern[]
   allInterns: Intern[]
+  reportCount: number
   onToggleAssign: (internId: string, assigned: boolean) => void
 }) {
   const navigate = useNavigate()
@@ -100,11 +102,22 @@ export function ProjectCardTile({
           <span className="text-xs text-navy-300">Unassigned</span>
         )}
 
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-navy-50 px-2.5 py-1 text-xs font-medium text-navy-500">
-          <span aria-hidden="true">🕑</span>
-          {WEEKDAY_SHORT[project.standup_day] ?? project.standup_day}{' '}
-          {project.standup_time?.slice(0, 5)}
-        </span>
+        <div className="flex items-center gap-2">
+          <span
+            className={`inline-flex items-center gap-1 text-xs font-medium ${
+              reportCount > 0 ? 'text-navy-500' : 'text-navy-300'
+            }`}
+            title={`${reportCount} saved report${reportCount === 1 ? '' : 's'}`}
+          >
+            <span aria-hidden="true">📄</span>
+            {reportCount}
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-navy-50 px-2.5 py-1 text-xs font-medium text-navy-500">
+            <span aria-hidden="true">🕑</span>
+            {WEEKDAY_SHORT[project.standup_day] ?? project.standup_day}{' '}
+            {project.standup_time?.slice(0, 5)}
+          </span>
+        </div>
       </div>
     </div>
   )

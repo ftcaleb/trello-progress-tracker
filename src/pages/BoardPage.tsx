@@ -17,6 +17,7 @@ import { useToast } from '../components/Toast'
 import { STATUS_LABELS, type Task } from '../types'
 import { PhaseColumn } from '../components/PhaseColumn'
 import { SettingsModal } from '../components/SettingsModal'
+import { ReportModal } from '../components/ReportModal'
 import { AvatarStack } from '../components/Avatar'
 
 type Containers = Record<string, string[]>
@@ -47,6 +48,7 @@ export function BoardPage() {
   const dragSource = useRef<{ phaseId: string; cleared: boolean } | null>(null)
   const [shakePhaseId, setShakePhaseId] = useState<string | null>(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [reportPhaseId, setReportPhaseId] = useState<string | null>(null)
 
   const taskById = useMemo(() => new Map(tasks.map((t) => [t.id, t])), [tasks])
   const phasePos = useMemo(() => {
@@ -297,6 +299,8 @@ export function BoardPage() {
                 dragActive={dragActive}
                 shaking={shakePhaseId === phase.id}
                 onAdvance={() => handleAdvance(phase.id)}
+                onOpenReport={() => setReportPhaseId(phase.id)}
+                hasReport={board.reportsByPhase.has(phase.id)}
               />
             )
           })}
@@ -332,6 +336,19 @@ export function BoardPage() {
           onClose={() => setSettingsOpen(false)}
         />
       ) : null}
+
+      {reportPhaseId
+        ? (() => {
+            const rp = phases.find((p) => p.id === reportPhaseId)
+            return rp ? (
+              <ReportModal
+                phase={rp}
+                board={board}
+                onClose={() => setReportPhaseId(null)}
+              />
+            ) : null
+          })()
+        : null}
     </div>
   )
 }

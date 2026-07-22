@@ -10,6 +10,8 @@ export function PortfolioPage() {
     reload,
     progressByProject,
     internsByProject,
+    reportCountByProject,
+    copyAllReports,
     setAssignment,
   } = usePortfolio()
   const { interns: allInterns } = useInterns()
@@ -17,13 +19,23 @@ export function PortfolioPage() {
   return (
     <div className="h-full overflow-y-auto fi-scroll">
       <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8">
-        <div className="mb-6">
-          <h1 className="text-2xl font-extrabold text-navy-900">
-            Project Portfolio
-          </h1>
-          <p className="mt-1 text-sm text-navy-400">
-            All cohort projects, their current phase, and who's working on each.
-          </p>
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-extrabold text-navy-900">
+              Project Portfolio
+            </h1>
+            <p className="mt-1 text-sm text-navy-400">
+              All cohort projects, their current phase, and who's working on
+              each.
+            </p>
+          </div>
+          <button
+            onClick={() => void copyAllReports()}
+            className="inline-flex items-center gap-2 rounded-xl bg-navy-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-800"
+            title="Copy the latest report from every project as one document"
+          >
+            <span aria-hidden="true">📋</span> Copy all reports
+          </button>
         </div>
 
         {loading ? (
@@ -48,6 +60,7 @@ export function PortfolioPage() {
                 }
                 interns={internsByProject.get(project.id) ?? []}
                 allInterns={allInterns}
+                reportCount={reportCountByProject.get(project.id) ?? 0}
                 onToggleAssign={(internId, assigned) =>
                   void setAssignment(project.id, internId, assigned)
                 }

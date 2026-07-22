@@ -6,6 +6,7 @@ import type {
   Comment,
   Intern,
   Phase,
+  PhaseReport,
   Project,
   Task,
   TaskStatus,
@@ -16,6 +17,7 @@ interface BoardState {
   phases: Phase[]
   tasks: Task[]
   comments: Comment[]
+  reports: PhaseReport[]
   assignedInternIds: string[]
 }
 
@@ -24,6 +26,7 @@ const EMPTY: BoardState = {
   phases: [],
   tasks: [],
   comments: [],
+  reports: [],
   assignedInternIds: [],
 }
 
@@ -38,13 +41,13 @@ export function useProjectBoard(projectId: string) {
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
 
-  const { project, phases, tasks, comments, assignedInternIds } = state
+  const { project, phases, tasks, comments, reports, assignedInternIds } = state
 
   const loadAll = useCallback(async () => {
     setLoading(true)
     setLoadError(null)
     try {
-      const [projectR, phasesR, tasksR, assignsR] = await Promise.all([
+      const [projectR, phasesR, tasksR, assignsR, reportsR] = await Promise.all([
         supabase.from('projects').select('*').eq('id', projectId).single(),
         supabase
           .from('phases')
@@ -60,11 +63,13 @@ export function useProjectBoard(projectId: string) {
           .from('project_interns')
           .select('intern_id')
           .eq('project_id', projectId),
+        supabase.from('phase_reports').select('*').eq('project_id', projectId),
       ])
       if (projectR.error) throw projectR.error
       if (phasesR.error) throw phasesR.error
       if (tasksR.error) throw tasksR.error
       if (assignsR.error) throw assignsR.error
+      if (reportsR.error) throw reportsR.error
 
       const loadedTasks = (tasksR.data as Task[]) ?? []
       const taskIds = loadedTasks.map((t) => t.id)
@@ -85,6 +90,7 @@ export function useProjectBoard(projectId: string) {
         phases: (phasesR.data as Phase[]) ?? [],
         tasks: loadedTasks,
         comments: loadedComments,
+        reports: (reportsR.data as PhaseReport[]) ?? [],
         assignedInternIds: (
           (assignsR.data as { intern_id: string }[]) ?? []
         ).map((r) => r.intern_id),
@@ -128,6 +134,12 @@ export function useProjectBoard(projectId: string) {
     const ids = new Set(assignedInternIds)
     return interns.filter((i) => ids.has(i.id))
   }, [interns, assignedInternIds])
+
+  const reportsByPhase = useMemo(() => {
+    const map = new Map<string, PhaseReport>()
+    for (const r of reports) map.set(r.phase_id, r)
+    return map
+  }, [reports])
 
   /** A phase is "cleared" when it has at least one task and all are approved. */
   const isPhaseCleared = useCallback(
@@ -512,6 +524,131 @@ export function useProjectBoard(projectId: string) {
     [comments, toast],
   )
 
+  // ---- Phase report (AI) --------------------------------------------------
+  /**
+   * Generate (or regenerate) the AI report for a phase via the Edge Function,
+   * then upsert it into phase_reports. Returns the saved report.
+   * Throws on failure so the modal can surface an inline error.
+   */
+  const generatePhaseReport = useCallback(
+    async (phaseId: string): Promise<PhaseReport> => {
+      if (!project) throw new Error('Project not loaded')
+      const phase = orderedPhases.find((p) => p.id === phaseId)
+      if (!phase) throw new Error('Phase not found')
+
+      const idx = orderedPhases.findIndex((p) => p.id === phaseId)
+      const nextPhaseName =
+        idx >= 0 && idx < orderedPhases.length - 1
+          ? orderedPhases[idx + 1].name
+          : null
+
+      const phaseTasks = (tasksByPhase.get(phaseId) ?? []).map((t) => ({
+        title: t.title,
+        status: t.status,
+      }))
+      // PHASE-STAMPED comments: stamped to this phase regardless of where the
+      // task now lives. Chronological order.
+      const phaseComments = comments
+        .filter((c) => c.phase_id === phaseId)
+        .sort(
+          (a, b) =>
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+        )
+        .map((c) => ({ content: c.content, createdAt: c.created_at }))
+
+      const payload = {
+        projectName: project.name,
+        projectDescription: project.description,
+        phaseName: phase.name,
+        weekNumber: phase.week_number,
+        tasks: phaseTasks,
+        comments: phaseComments,
+        nextPhaseName,
+      }
+
+      const { data, error } = await supabase.functions.invoke(
+        'generate-phase-report',
+        { body: payload },
+      )
+
+      if (error) {
+        // Try to surface the function's JSON { error } body.
+        let message = error.message
+        try {
+          const ctx = (error as { context?: Response }).context
+          if (ctx && typeof ctx.json === 'function') {
+            const parsed = await ctx.json()
+            if (parsed?.error) message = parsed.error
+          }
+        } catch {
+          /* ignore */
+        }
+        throw new Error(message)
+      }
+
+      const content = (data as { content?: string })?.content?.trim()
+      if (!content) throw new Error('The report came back empty.')
+
+      const now = nowIso()
+      const { data: saved, error: upErr } = await supabase
+        .from('phase_reports')
+        .upsert(
+          {
+            project_id: project.id,
+            phase_id: phaseId,
+            content,
+            generated_at: now,
+            updated_at: now,
+          },
+          { onConflict: 'project_id,phase_id' },
+        )
+        .select()
+        .single()
+      if (upErr) throw upErr
+
+      const savedReport = saved as PhaseReport
+      setState((s) => ({
+        ...s,
+        reports: [
+          ...s.reports.filter((r) => r.phase_id !== phaseId),
+          savedReport,
+        ],
+      }))
+      return savedReport
+    },
+    [project, orderedPhases, tasksByPhase, comments],
+  )
+
+  const saveReportContent = useCallback(
+    async (phaseId: string, content: string) => {
+      const trimmed = content.trim()
+      if (!trimmed) return
+      const existing = reports.find((r) => r.phase_id === phaseId)
+      if (!existing) return
+      const snapshot = reports
+      const updated_at = nowIso()
+      setState((s) => ({
+        ...s,
+        reports: s.reports.map((r) =>
+          r.phase_id === phaseId ? { ...r, content: trimmed, updated_at } : r,
+        ),
+      }))
+      try {
+        const { error } = await supabase
+          .from('phase_reports')
+          .update({ content: trimmed, updated_at })
+          .eq('id', existing.id)
+        if (error) throw error
+      } catch (e) {
+        setState((s) => ({ ...s, reports: snapshot }))
+        toast.error(
+          `Could not save report: ${e instanceof Error ? e.message : 'unknown error'}`,
+        )
+      }
+    },
+    [reports, toast],
+  )
+
   // ---- Project settings ---------------------------------------------------
   const updateSettings = useCallback(
     async (
@@ -550,6 +687,7 @@ export function useProjectBoard(projectId: string) {
     tasksByPhase,
     commentCountByTask,
     assignedInterns,
+    reportsByPhase,
     // status
     loading,
     loadError,
@@ -571,6 +709,9 @@ export function useProjectBoard(projectId: string) {
     addComment,
     updateComment,
     deleteComment,
+    // reports
+    generatePhaseReport,
+    saveReportContent,
     // settings
     updateSettings,
   }

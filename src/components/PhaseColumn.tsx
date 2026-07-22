@@ -15,6 +15,8 @@ export function PhaseColumn({
   dragActive,
   shaking,
   onAdvance,
+  onOpenReport,
+  hasReport,
 }: {
   phase: Phase
   tasks: Task[]
@@ -25,6 +27,8 @@ export function PhaseColumn({
   dragActive: boolean
   shaking: boolean
   onAdvance: () => void
+  onOpenReport: () => void
+  hasReport: boolean
 }) {
   const { setNodeRef, isOver } = useDroppable({
     id: phase.id,
@@ -136,6 +140,16 @@ export function PhaseColumn({
                 <div className="absolute right-0 top-8 z-30 w-40 overflow-hidden rounded-lg border border-navy-100 bg-white py-1 shadow-pop">
                   <button
                     onClick={() => {
+                      setMenuOpen(false)
+                      onOpenReport()
+                    }}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-navy-700 transition hover:bg-navy-50"
+                  >
+                    <span aria-hidden="true">📄</span>
+                    {hasReport ? 'View report' : 'Generate report'}
+                  </button>
+                  <button
+                    onClick={() => {
                       setDraft(phase.name)
                       setEditing(true)
                       setMenuOpen(false)
@@ -170,18 +184,27 @@ export function PhaseColumn({
             <span className="inline-flex items-center gap-1 rounded-full bg-maroon-600 px-2 py-0.5 text-[11px] font-semibold text-white shadow-sm">
               Phase cleared ✓
             </span>
-            {isLast ? (
-              <span className="text-[11px] font-medium text-navy-400">
-                Final phase
-              </span>
-            ) : (
+            <div className="flex items-center gap-1.5">
               <button
-                onClick={onAdvance}
-                className="rounded-lg bg-gradient-to-r from-sunburst-500 to-maroon-600 px-2.5 py-1 text-xs font-semibold text-white shadow-sm transition hover:brightness-110"
+                onClick={onOpenReport}
+                title={hasReport ? 'View phase report' : 'Generate phase report'}
+                className="inline-flex items-center gap-1 rounded-lg border border-navy-200 bg-white px-2 py-1 text-xs font-semibold text-navy-700 shadow-sm transition hover:border-sunburst-400 hover:text-sunburst-600"
               >
-                Advance phase →
+                📄 Report
               </button>
-            )}
+              {isLast ? (
+                <span className="text-[11px] font-medium text-navy-400">
+                  Final phase
+                </span>
+              ) : (
+                <button
+                  onClick={onAdvance}
+                  className="rounded-lg bg-gradient-to-r from-sunburst-500 to-maroon-600 px-2.5 py-1 text-xs font-semibold text-white shadow-sm transition hover:brightness-110"
+                >
+                  Advance phase →
+                </button>
+              )}
+            </div>
           </div>
         ) : null}
       </div>

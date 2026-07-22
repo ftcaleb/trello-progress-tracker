@@ -48,6 +48,15 @@ export interface Comment {
   updated_at: string
 }
 
+export interface PhaseReport {
+  id: string
+  project_id: string
+  phase_id: string
+  content: string
+  generated_at: string
+  updated_at: string
+}
+
 export const ROLE_LABELS: Record<Role, string> = {
   developer: 'Developer',
   designer: 'Designer',
