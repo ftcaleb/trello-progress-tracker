@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import type { Intern, Project } from '../types'
 import { WEEKDAY_SHORT } from '../types'
 import type { ProjectProgress } from '../hooks/usePortfolio'
+import { useAuth } from '../hooks/useAuth'
 import { AvatarStack } from './Avatar'
 import { AssignPopover } from './AssignPopover'
 
@@ -22,6 +23,7 @@ export function ProjectCardTile({
   onToggleAssign: (internId: string, assigned: boolean) => void
 }) {
   const navigate = useNavigate()
+  const { isAdmin } = useAuth()
   const [assignOpen, setAssignOpen] = useState(false)
   const assignedIds = new Set(interns.map((i) => i.id))
 
@@ -44,26 +46,28 @@ export function ProjectCardTile({
           </p>
         </div>
 
-        {/* Assign affordance */}
-        <div className="relative shrink-0">
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              setAssignOpen((v) => !v)
-            }}
-            className="rounded-lg border border-navy-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-navy-600 transition hover:border-sunburst-400 hover:text-sunburst-600"
-          >
-            + Assign
-          </button>
-          {assignOpen ? (
-            <AssignPopover
-              interns={allInterns}
-              assignedIds={assignedIds}
-              onToggle={onToggleAssign}
-              onClose={() => setAssignOpen(false)}
-            />
-          ) : null}
-        </div>
+        {/* Assign affordance — admins only */}
+        {isAdmin ? (
+          <div className="relative shrink-0">
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                setAssignOpen((v) => !v)
+              }}
+              className="rounded-lg border border-navy-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-navy-600 transition hover:border-sunburst-400 hover:text-sunburst-600"
+            >
+              + Assign
+            </button>
+            {assignOpen ? (
+              <AssignPopover
+                interns={allInterns}
+                assignedIds={assignedIds}
+                onToggle={onToggleAssign}
+                onClose={() => setAssignOpen(false)}
+              />
+            ) : null}
+          </div>
+        ) : null}
       </div>
 
       {/* Progress */}

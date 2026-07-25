@@ -1,11 +1,12 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
-import { AuthProvider, RequireAuth } from './hooks/useAuth'
+import { AuthProvider, RequireAuth, RequireAdmin } from './hooks/useAuth'
 import { InternsProvider } from './hooks/useInterns'
 import { ToastProvider } from './components/Toast'
 import { Layout } from './components/Layout'
 import { AuthPage } from './pages/AuthPage'
 import { PortfolioPage } from './pages/PortfolioPage'
 import { BoardPage } from './pages/BoardPage'
+import { AdminPage } from './pages/AdminPage'
 
 export default function App() {
   return (
@@ -27,6 +28,14 @@ export default function App() {
           >
             <Route path="/" element={<PortfolioPage />} />
             <Route path="/project/:id" element={<BoardPage />} />
+            <Route
+              path="/admin"
+              element={
+                <RequireAdmin>
+                  <AdminPage />
+                </RequireAdmin>
+              }
+            />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

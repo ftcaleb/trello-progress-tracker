@@ -13,10 +13,14 @@ function friendlyError(message: string): string {
   return message
 }
 
+type Mode = 'moodle' | 'email'
+
 export function AuthPage() {
-  const { session, signIn } = useAuth()
+  const { session, signIn, signInWithMoodle } = useAuth()
   const location = useLocation()
 
+  const [mode, setMode] = useState<Mode>('moodle')
+  const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -27,16 +31,31 @@ export function AuthPage() {
     return <Navigate to={from} replace />
   }
 
+  const switchMode = (next: Mode) => {
+    setMode(next)
+    setError(null)
+    setPassword('')
+  }
+
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setError(null)
 
-    if (!email.trim()) return setError('Please enter your email.')
-    if (!password) return setError('Please enter your password.')
+    if (mode === 'moodle') {
+      if (!username.trim()) return setError('Please enter your Moodle username.')
+      if (!password) return setError('Please enter your Moodle password.')
+    } else {
+      if (!email.trim()) return setError('Please enter your email.')
+      if (!password) return setError('Please enter your password.')
+    }
 
     setSubmitting(true)
     try {
-      await signIn(email.trim(), password)
+      if (mode === 'moodle') {
+        await signInWithMoodle(username.trim(), password)
+      } else {
+        await signIn(email.trim(), password)
+      }
       // On success the auth listener sets the session and this component
       // redirects via the <Navigate> above.
     } catch (err) {
@@ -90,34 +109,58 @@ export function AuthPage() {
 
           <h1 className="text-2xl font-extrabold text-navy-900">Welcome back</h1>
           <p className="mt-1 text-sm text-navy-400">
-            Log in to your project tracker.
+            {mode === 'moodle'
+              ? 'Sign in with your Moodle account.'
+              : 'Administrator sign-in.'}
           </p>
 
           <form onSubmit={onSubmit} className="mt-7 space-y-4" noValidate>
-            <div>
-              <label
-                htmlFor="email"
-                className="mb-1.5 block text-sm font-medium text-navy-700"
-              >
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="w-full rounded-xl border border-navy-200 bg-white px-3.5 py-2.5 text-sm text-navy-900 outline-none transition placeholder:text-navy-300 focus:border-sunburst-500 focus:ring-4 focus:ring-sunburst-500/15"
-              />
-            </div>
+            {mode === 'moodle' ? (
+              <div>
+                <label
+                  htmlFor="username"
+                  className="mb-1.5 block text-sm font-medium text-navy-700"
+                >
+                  Moodle username
+                </label>
+                <input
+                  id="username"
+                  type="text"
+                  autoComplete="username"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="your Moodle username"
+                  className="w-full rounded-xl border border-navy-200 bg-white px-3.5 py-2.5 text-sm text-navy-900 outline-none transition placeholder:text-navy-300 focus:border-sunburst-500 focus:ring-4 focus:ring-sunburst-500/15"
+                />
+              </div>
+            ) : (
+              <div>
+                <label
+                  htmlFor="email"
+                  className="mb-1.5 block text-sm font-medium text-navy-700"
+                >
+                  Email
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="w-full rounded-xl border border-navy-200 bg-white px-3.5 py-2.5 text-sm text-navy-900 outline-none transition placeholder:text-navy-300 focus:border-sunburst-500 focus:ring-4 focus:ring-sunburst-500/15"
+                />
+              </div>
+            )}
 
             <div>
               <label
                 htmlFor="password"
                 className="mb-1.5 block text-sm font-medium text-navy-700"
               >
-                Password
+                {mode === 'moodle' ? 'Moodle password' : 'Password'}
               </label>
               <input
                 id="password"
@@ -144,13 +187,35 @@ export function AuthPage() {
               {submitting ? (
                 <>
                   <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
-                  Logging in…
+                  {mode === 'moodle' ? 'Checking with Moodle…' : 'Logging in…'}
                 </>
+              ) : mode === 'moodle' ? (
+                'Sign in with Moodle'
               ) : (
                 'Log in'
               )}
             </button>
           </form>
+
+          <div className="mt-6 border-t border-navy-100 pt-4 text-center">
+            {mode === 'moodle' ? (
+              <button
+                type="button"
+                onClick={() => switchMode('email')}
+                className="text-xs font-medium text-navy-400 transition hover:text-maroon-600 hover:underline"
+              >
+                Administrator sign-in
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => switchMode('moodle')}
+                className="text-xs font-medium text-navy-400 transition hover:text-maroon-600 hover:underline"
+              >
+                ← Back to Moodle sign-in
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

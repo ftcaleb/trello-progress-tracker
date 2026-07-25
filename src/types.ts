@@ -32,6 +32,7 @@ export interface Intern {
   name: string
   initials: string
   role: Role
+  moodle_user_id: number | null
 }
 
 export interface ProjectIntern {
@@ -55,6 +56,20 @@ export interface PhaseReport {
   content: string
   generated_at: string
   updated_at: string
+}
+
+export type AppRole = 'admin' | 'member'
+
+export interface Profile {
+  id: string
+  moodle_user_id: number | null
+  moodle_username: string | null
+  email: string | null
+  full_name: string | null
+  app_role: AppRole
+  is_active: boolean
+  created_at: string
+  last_login_at: string | null
 }
 
 export const ROLE_LABELS: Record<Role, string> = {
