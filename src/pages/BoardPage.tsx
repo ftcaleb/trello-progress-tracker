@@ -13,6 +13,7 @@ import {
 } from '@dnd-kit/core'
 import { arrayMove } from '@dnd-kit/sortable'
 import { useProjectBoard } from '../hooks/useProjectBoard'
+import { useAuth } from '../hooks/useAuth'
 import { useToast } from '../components/Toast'
 import { STATUS_LABELS, type Task } from '../types'
 import { PhaseColumn } from '../components/PhaseColumn'
@@ -26,6 +27,8 @@ export function BoardPage() {
   const { id = '' } = useParams()
   const board = useProjectBoard(id)
   const toast = useToast()
+  const { isAdmin, session } = useAuth()
+  const currentUserId = session?.user?.id ?? null
 
   const {
     project,
@@ -149,6 +152,12 @@ export function BoardPage() {
     setActiveId(null)
     dragSource.current = null
 
+    if (!isAdmin) {
+      toast.error('Only admins can move tasks between phases.')
+      setContainers(buildContainers())
+      return
+    }
+
     if (!over || !src) {
       setContainers(buildContainers())
       return
@@ -264,12 +273,14 @@ export function BoardPage() {
           ) : (
             <span className="text-xs text-navy-300">No team assigned</span>
           )}
-          <button
-            onClick={() => setSettingsOpen(true)}
-            className="rounded-lg border border-navy-200 px-3 py-1.5 text-sm font-medium text-navy-600 transition hover:bg-navy-50"
-          >
-            ⚙ Settings
-          </button>
+          {isAdmin ? (
+            <button
+              onClick={() => setSettingsOpen(true)}
+              className="rounded-lg border border-navy-200 px-3 py-1.5 text-sm font-medium text-navy-600 transition hover:bg-navy-50"
+            >
+              ⚙ Settings
+            </button>
+          ) : null}
         </div>
       </div>
 
@@ -301,18 +312,22 @@ export function BoardPage() {
                 onAdvance={() => handleAdvance(phase.id)}
                 onOpenReport={() => setReportPhaseId(phase.id)}
                 hasReport={board.reportsByPhase.has(phase.id)}
+                isAdmin={isAdmin}
+                currentUserId={currentUserId}
               />
             )
           })}
 
-          <div className="w-[19rem] shrink-0">
-            <button
-              onClick={handleAddPhase}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-navy-200 bg-white/50 px-4 py-3 text-sm font-medium text-navy-500 transition hover:border-sunburst-400 hover:bg-sunburst-50/50 hover:text-sunburst-600"
-            >
-              <span className="text-lg leading-none">+</span> Add phase
-            </button>
-          </div>
+          {isAdmin ? (
+            <div className="w-[19rem] shrink-0">
+              <button
+                onClick={handleAddPhase}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-navy-200 bg-white/50 px-4 py-3 text-sm font-medium text-navy-500 transition hover:border-sunburst-400 hover:bg-sunburst-50/50 hover:text-sunburst-600"
+              >
+                <span className="text-lg leading-none">+</span> Add phase
+              </button>
+            </div>
+          ) : null}
         </div>
 
         <DragOverlay dropAnimation={null}>

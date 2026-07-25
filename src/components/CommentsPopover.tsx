@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import type { Comment, Phase } from '../types'
+import type { Comment, Phase, PublicProfile } from '../types'
 
 const WIDTH = 344
 const MAX_HEIGHT = 440
@@ -19,7 +19,10 @@ function formatTimestamp(iso: string): string {
 export function CommentsPopover({
   anchorEl,
   comments,
+  authors = {},
   phases,
+  isAdmin = false,
+  currentUserId = null,
   onAdd,
   onUpdate,
   onDelete,
@@ -27,7 +30,10 @@ export function CommentsPopover({
 }: {
   anchorEl: HTMLElement
   comments: Comment[]
+  authors?: Record<string, PublicProfile>
   phases: Phase[]
+  isAdmin?: boolean
+  currentUserId?: string | null
   onAdd: (content: string) => void
   onUpdate: (commentId: string, content: string) => void
   onDelete: (commentId: string) => void
@@ -165,6 +171,8 @@ export function CommentsPopover({
                     <CommentItem
                       key={c.id}
                       comment={c}
+                      author={c.created_by ? authors[c.created_by] : undefined}
+                      canEdit={isAdmin || (Boolean(currentUserId) && c.created_by === currentUserId)}
                       onUpdate={onUpdate}
                       onDelete={onDelete}
                     />
@@ -205,10 +213,14 @@ export function CommentsPopover({
 
 function CommentItem({
   comment,
+  author,
+  canEdit,
   onUpdate,
   onDelete,
 }: {
   comment: Comment
+  author?: PublicProfile
+  canEdit: boolean
   onUpdate: (commentId: string, content: string) => void
   onDelete: (commentId: string) => void
 }) {
@@ -219,6 +231,10 @@ function CommentItem({
     new Date(comment.updated_at).getTime() -
       new Date(comment.created_at).getTime() >
     1500
+
+  const authorName = author
+    ? author.full_name?.trim() || (author.moodle_username ? `@${author.moodle_username}` : 'Unknown User')
+    : 'Earlier note'
 
   if (editing) {
     return (
@@ -258,6 +274,9 @@ function CommentItem({
 
   return (
     <li className="group rounded-lg border border-navy-100 bg-navy-50/40 p-2.5">
+      <div className="mb-1 flex items-center justify-between text-[11px] font-bold text-navy-500">
+        <span>{authorName}</span>
+      </div>
       <p className="whitespace-pre-wrap text-sm text-navy-800">
         {comment.content}
       </p>
@@ -266,25 +285,27 @@ function CommentItem({
           {formatTimestamp(comment.created_at)}
           {edited ? <span className="ml-1 italic">(edited)</span> : null}
         </span>
-        <div className="flex items-center gap-1 opacity-0 transition group-hover:opacity-100">
-          <button
-            onClick={() => {
-              setDraft(comment.content)
-              setEditing(true)
-            }}
-            className="rounded px-1.5 py-0.5 text-[11px] font-medium text-navy-500 transition hover:bg-white hover:text-navy-800"
-          >
-            Edit
-          </button>
-          <button
-            onClick={() => {
-              if (window.confirm('Delete this comment?')) onDelete(comment.id)
-            }}
-            className="rounded px-1.5 py-0.5 text-[11px] font-medium text-navy-400 transition hover:bg-white hover:text-sunburst-600"
-          >
-            Delete
-          </button>
-        </div>
+        {canEdit ? (
+          <div className="flex items-center gap-1 opacity-0 transition group-hover:opacity-100">
+            <button
+              onClick={() => {
+                setDraft(comment.content)
+                setEditing(true)
+              }}
+              className="rounded px-1.5 py-0.5 text-[11px] font-medium text-navy-500 transition hover:bg-white hover:text-navy-800"
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => {
+                if (window.confirm('Delete this comment?')) onDelete(comment.id)
+              }}
+              className="rounded px-1.5 py-0.5 text-[11px] font-medium text-navy-400 transition hover:bg-white hover:text-sunburst-600"
+            >
+              Delete
+            </button>
+          </div>
+        ) : null}
       </div>
     </li>
   )

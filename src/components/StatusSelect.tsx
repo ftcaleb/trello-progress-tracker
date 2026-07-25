@@ -25,12 +25,22 @@ function StatusIcon({ status }: { status: TaskStatus }) {
 export function StatusSelect({
   value,
   onChange,
+  isAdmin = false,
 }: {
   value: TaskStatus
   onChange: (status: TaskStatus) => void
+  isAdmin?: boolean
 }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+
+  // Members cannot change status at all if approved — approved is fully locked.
+  const isLocked = !isAdmin && value === 'approved'
+
+  // Members only see in_progress and blocked options.
+  const availableStatuses: TaskStatus[] = isAdmin
+    ? STATUS_ORDER
+    : STATUS_ORDER.filter((s) => s !== 'approved')
 
   useEffect(() => {
     if (!open) return
@@ -45,15 +55,19 @@ export function StatusSelect({
     <div ref={ref} className="relative">
       <button
         type="button"
+        disabled={isLocked}
         onClick={(e) => {
           e.stopPropagation()
-          setOpen((v) => !v)
+          if (!isLocked) setOpen((v) => !v)
         }}
-        className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold shadow-sm transition ${triggerClass[value]}`}
+        title={isLocked ? 'Only admins can change an approved task' : undefined}
+        className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold shadow-sm transition ${triggerClass[value]} ${
+          isLocked ? 'cursor-not-allowed opacity-75' : ''
+        }`}
       >
         <StatusIcon status={value} />
         {STATUS_LABELS[value]}
-        <span className="opacity-60">▾</span>
+        {!isLocked ? <span className="opacity-60">▾</span> : null}
       </button>
 
       {open ? (
@@ -61,7 +75,7 @@ export function StatusSelect({
           className="absolute left-0 top-8 z-30 w-40 animate-fade-in overflow-hidden rounded-xl border border-navy-100 bg-white py-1 shadow-pop"
           onClick={(e) => e.stopPropagation()}
         >
-          {STATUS_ORDER.map((status) => (
+          {availableStatuses.map((status) => (
             <button
               key={status}
               onClick={() => {

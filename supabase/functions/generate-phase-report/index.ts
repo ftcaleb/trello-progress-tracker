@@ -145,6 +145,22 @@ Deno.serve(async (req: Request) => {
       return json({ error: 'Unauthorized' }, 401)
     }
 
+    // 1b) Admin-only gate (D8): report generation writes with the service key
+    //     which bypasses RLS, so we must enforce the admin check here explicitly.
+    const secretKey = Deno.env.get('SB_SECRET_KEY') ?? Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    if (!secretKey) {
+      return json({ error: 'Server service key is not configured' }, 500)
+    }
+    const adminClient = createClient(supabaseUrl, secretKey)
+    const { data: profile } = await adminClient
+      .from('profiles')
+      .select('app_role')
+      .eq('id', userData.user.id)
+      .single()
+    if (!profile || profile.app_role !== 'admin') {
+      return json({ error: 'Admins only' }, 403)
+    }
+
     // 2) Anthropic key must be present (server-side secret).
     const apiKey = Deno.env.get('ANTHROPIC_API_KEY')
     if (!apiKey) {

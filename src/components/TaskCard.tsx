@@ -10,10 +10,14 @@ export function TaskCard({
   task,
   board,
   dragDisabled = false,
+  isAdmin = false,
+  currentUserId = null,
 }: {
   task: Task
   board: UseProjectBoard
   dragDisabled?: boolean
+  isAdmin?: boolean
+  currentUserId?: string | null
 }) {
   const {
     attributes,
@@ -57,8 +61,20 @@ export function TaskCard({
     transition,
   }
 
+  // Members can only edit title if they created the task and it's not approved
+  const canEditTitle =
+    isAdmin || (task.created_by === currentUserId && task.status !== 'approved')
+
+  // Members can only delete if they created the task and it's not approved
+  const canDelete =
+    isAdmin || (task.created_by === currentUserId && task.status !== 'approved')
+
   const saveTitle = () => {
     const trimmed = title.trim()
+    if (!canEditTitle) {
+      setTitle(task.title) // revert
+      return
+    }
     if (trimmed && trimmed !== task.title) board.updateTaskTitle(task.id, trimmed)
     else setTitle(task.title)
   }
@@ -77,13 +93,14 @@ export function TaskCard({
         isDragging ? 'opacity-40' : ''
       }`}
     >
-      {/* Title (inline editable) */}
+      {/* Title (inline editable — members only for own non-approved tasks) */}
       <div className="mb-2.5 flex items-start gap-1">
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           onPointerDown={stop}
           onBlur={saveTitle}
+          readOnly={!canEditTitle}
           onKeyDown={(e) => {
             if (e.key === 'Enter') (e.target as HTMLInputElement).blur()
             if (e.key === 'Escape') {
@@ -91,35 +108,41 @@ export function TaskCard({
               ;(e.target as HTMLInputElement).blur()
             }
           }}
-          className="min-w-0 flex-1 rounded-md border border-transparent bg-transparent px-1.5 py-1 text-sm font-semibold text-navy-900 outline-none transition hover:border-navy-100 focus:border-navy-200 focus:bg-navy-50/50"
+          className={`min-w-0 flex-1 rounded-md border border-transparent bg-transparent px-1.5 py-1 text-sm font-semibold text-navy-900 outline-none transition ${
+            canEditTitle
+              ? 'hover:border-navy-100 focus:border-navy-200 focus:bg-navy-50/50'
+              : 'cursor-default'
+          }`}
         />
 
-        {/* Card menu */}
-        <div className="relative" ref={menuRef}>
-          <button
-            onPointerDown={stop}
-            onClick={() => setMenuOpen((v) => !v)}
-            className="rounded-md px-1.5 py-0.5 text-navy-300 opacity-0 transition hover:bg-navy-50 hover:text-navy-600 group-hover:opacity-100"
-            aria-label="Task options"
-          >
-            ⋯
-          </button>
-          {menuOpen ? (
-            <div className="absolute right-0 top-7 z-30 w-32 overflow-hidden rounded-lg border border-navy-100 bg-white py-1 shadow-pop">
-              <button
-                onPointerDown={stop}
-                onClick={() => {
-                  setMenuOpen(false)
-                  if (window.confirm(`Delete task "${task.title}"?`))
-                    board.deleteTask(task.id)
-                }}
-                className="block w-full px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
-              >
-                Delete task
-              </button>
-            </div>
-          ) : null}
-        </div>
+        {/* Card menu — only show if there are any actions available */}
+        {canDelete ? (
+          <div className="relative" ref={menuRef}>
+            <button
+              onPointerDown={stop}
+              onClick={() => setMenuOpen((v) => !v)}
+              className="rounded-md px-1.5 py-0.5 text-navy-300 opacity-0 transition hover:bg-navy-50 hover:text-navy-600 group-hover:opacity-100"
+              aria-label="Task options"
+            >
+              ⋯
+            </button>
+            {menuOpen ? (
+              <div className="absolute right-0 top-7 z-30 w-32 overflow-hidden rounded-lg border border-navy-100 bg-white py-1 shadow-pop">
+                <button
+                  onPointerDown={stop}
+                  onClick={() => {
+                    setMenuOpen(false)
+                    if (window.confirm(`Delete task "${task.title}"?`))
+                      board.deleteTask(task.id)
+                  }}
+                  className="block w-full px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
+                >
+                  Delete task
+                </button>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
       </div>
 
       {/* Footer: status + comments */}
@@ -128,6 +151,7 @@ export function TaskCard({
           <StatusSelect
             value={task.status}
             onChange={(status) => board.setTaskStatus(task.id, status)}
+            isAdmin={isAdmin}
           />
         </div>
 
@@ -163,7 +187,10 @@ export function TaskCard({
         <CommentsPopover
           anchorEl={commentBtnRef.current}
           comments={taskComments}
+          authors={board.authors}
           phases={board.phases}
+          isAdmin={isAdmin}
+          currentUserId={currentUserId}
           onAdd={(content) => board.addComment(task.id, content)}
           onUpdate={board.updateComment}
           onDelete={board.deleteComment}

@@ -25,6 +25,7 @@ export interface Task {
   title: string
   status: TaskStatus
   position: number
+  created_by?: string | null
 }
 
 export interface Intern {
@@ -47,6 +48,13 @@ export interface Comment {
   content: string
   created_at: string
   updated_at: string
+  created_by?: string | null
+}
+
+export interface PublicProfile {
+  id: string
+  full_name: string | null
+  moodle_username: string | null
 }
 
 export interface PhaseReport {

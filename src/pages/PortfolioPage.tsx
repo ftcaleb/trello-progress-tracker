@@ -1,5 +1,6 @@
 import { usePortfolio } from '../hooks/usePortfolio'
 import { useInterns } from '../hooks/useInterns'
+import { useAuth } from '../hooks/useAuth'
 import { ProjectCardTile } from '../components/ProjectCardTile'
 
 export function PortfolioPage() {
@@ -15,6 +16,7 @@ export function PortfolioPage() {
     setAssignment,
   } = usePortfolio()
   const { interns: allInterns } = useInterns()
+  const { isAdmin } = useAuth()
 
   return (
     <div className="h-full overflow-y-auto fi-scroll">
@@ -43,13 +45,15 @@ export function PortfolioPage() {
               </span>
             </div>
           </div>
-          <button
-            onClick={() => void copyAllReports()}
-            className="inline-flex items-center gap-2 rounded-xl bg-navy-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-800"
-            title="Copy the latest report from every project as one document"
-          >
-            <span aria-hidden="true">📋</span> Copy all reports
-          </button>
+          {isAdmin ? (
+            <button
+              onClick={() => void copyAllReports()}
+              className="inline-flex items-center gap-2 rounded-xl bg-navy-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-800"
+              title="Copy the latest report from every project as one document"
+            >
+              <span aria-hidden="true">📋</span> Copy all reports
+            </button>
+          ) : null}
         </div>
 
         {loading ? (

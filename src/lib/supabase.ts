@@ -16,5 +16,4 @@ export const supabase = createClient(supabaseUrl ?? '', supabaseAnonKey ?? '', {
     autoRefreshToken: true,
   },
 })
-
 export const hasSupabaseConfig = Boolean(supabaseUrl && supabaseAnonKey)

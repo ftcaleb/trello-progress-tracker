@@ -8,6 +8,7 @@ import type {
   Phase,
   PhaseReport,
   Project,
+  PublicProfile,
   Task,
   TaskStatus,
 } from '../types'
@@ -19,6 +20,7 @@ interface BoardState {
   comments: Comment[]
   reports: PhaseReport[]
   assignedInternIds: string[]
+  authors: Record<string, PublicProfile>
 }
 
 const EMPTY: BoardState = {
@@ -28,6 +30,7 @@ const EMPTY: BoardState = {
   comments: [],
   reports: [],
   assignedInternIds: [],
+  authors: {},
 }
 
 function nowIso(): string {
@@ -41,7 +44,7 @@ export function useProjectBoard(projectId: string) {
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
 
-  const { project, phases, tasks, comments, reports, assignedInternIds } = state
+  const { project, phases, tasks, comments, reports, assignedInternIds, authors } = state
 
   const loadAll = useCallback(async () => {
     setLoading(true)
@@ -75,6 +78,7 @@ export function useProjectBoard(projectId: string) {
       const taskIds = loadedTasks.map((t) => t.id)
 
       let loadedComments: Comment[] = []
+      let loadedAuthors: Record<string, PublicProfile> = {}
       if (taskIds.length > 0) {
         const commentsR = await supabase
           .from('comments')
@@ -83,6 +87,22 @@ export function useProjectBoard(projectId: string) {
           .order('created_at', { ascending: true })
         if (commentsR.error) throw commentsR.error
         loadedComments = (commentsR.data as Comment[]) ?? []
+
+        const createdByIds = Array.from(
+          new Set(loadedComments.map((c) => c.created_by).filter((id): id is string => Boolean(id)))
+        )
+        if (createdByIds.length > 0) {
+          const profilesR = await supabase
+            .from('public_profiles')
+            .select('id, full_name, moodle_username')
+            .in('id', createdByIds)
+          if (!profilesR.error && profilesR.data) {
+            loadedAuthors = profilesR.data.reduce<Record<string, PublicProfile>>((acc, p) => {
+              acc[p.id] = p
+              return acc
+            }, {})
+          }
+        }
       }
 
       setState({
@@ -94,6 +114,7 @@ export function useProjectBoard(projectId: string) {
         assignedInternIds: (
           (assignsR.data as { intern_id: string }[]) ?? []
         ).map((r) => r.intern_id),
+        authors: loadedAuthors,
       })
     } catch (e) {
       setLoadError(e instanceof Error ? e.message : 'Failed to load project.')
@@ -462,14 +483,32 @@ export function useProjectBoard(projectId: string) {
           .select()
           .single()
         if (error) throw error
-        setState((s) => ({ ...s, comments: [...s.comments, data as Comment] }))
+        const newComment = data as Comment
+
+        let nextAuthors = state.authors
+        if (newComment.created_by && !nextAuthors[newComment.created_by]) {
+          const { data: prof } = await supabase
+            .from('public_profiles')
+            .select('id, full_name, moodle_username')
+            .eq('id', newComment.created_by)
+            .single()
+          if (prof) {
+            nextAuthors = { ...nextAuthors, [prof.id]: prof as PublicProfile }
+          }
+        }
+
+        setState((s) => ({
+          ...s,
+          comments: [...s.comments, newComment],
+          authors: nextAuthors,
+        }))
       } catch (e) {
         toast.error(
           `Could not add comment: ${e instanceof Error ? e.message : 'unknown error'}`,
         )
       }
     },
-    [tasks, toast],
+    [tasks, toast, state.authors],
   )
 
   const updateComment = useCallback(
@@ -684,6 +723,7 @@ export function useProjectBoard(projectId: string) {
     phases: orderedPhases,
     tasks,
     comments,
+    authors,
     tasksByPhase,
     commentCountByTask,
     assignedInterns,
