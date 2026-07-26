@@ -692,7 +692,14 @@ export function useProjectBoard(projectId: string) {
   const updateSettings = useCallback(
     async (
       patch: Partial<
-        Pick<Project, 'name' | 'description' | 'standup_day' | 'standup_time'>
+        Pick<
+          Project,
+          | 'name'
+          | 'description'
+          | 'standup_day'
+          | 'standup_time'
+          | 'initial_meet_date'
+        >
       >,
     ) => {
       if (!project) return

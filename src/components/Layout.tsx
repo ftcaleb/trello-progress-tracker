@@ -36,6 +36,34 @@ export function Layout() {
         </Link>
 
         <div className="flex items-center gap-2 sm:gap-3">
+          <NavLink
+            to="/teams"
+            className={({ isActive }) =>
+              `flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition ${
+                isActive
+                  ? 'border-sunburst-400 bg-sunburst-500 text-white'
+                  : 'border-white/15 bg-white/10 text-white hover:bg-white/20'
+              }`
+            }
+          >
+            <span aria-hidden="true">👥</span>
+            <span className="hidden sm:inline">Teams</span>
+          </NavLink>
+
+          <NavLink
+            to="/attendance"
+            className={({ isActive }) =>
+              `flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition ${
+                isActive
+                  ? 'border-sunburst-400 bg-sunburst-500 text-white'
+                  : 'border-white/15 bg-white/10 text-white hover:bg-white/20'
+              }`
+            }
+          >
+            <span aria-hidden="true">🗓️</span>
+            <span className="hidden sm:inline">Attendance</span>
+          </NavLink>
+
           {isAdmin ? (
             <NavLink
               to="/admin"

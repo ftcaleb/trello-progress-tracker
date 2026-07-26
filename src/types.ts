@@ -7,6 +7,7 @@ export interface Project {
   description: string | null
   standup_day: string
   standup_time: string
+  initial_meet_date: string | null
   created_at: string
 }
 
@@ -64,6 +65,58 @@ export interface PhaseReport {
   content: string
   generated_at: string
   updated_at: string
+}
+
+export interface Team {
+  id: string
+  name: string
+  position: number
+  created_at: string
+}
+
+export interface TeamMember {
+  id: string
+  team_id: string
+  intern_id: string | null
+  name: string
+  initials: string
+  role: Role
+  is_active: boolean
+  position: number
+  created_at: string
+}
+
+export interface TeamProject {
+  id: string
+  team_id: string
+  name: string
+  position: number
+  created_at: string
+}
+
+export interface StandupSession {
+  id: string
+  project_id: string
+  session_date: string
+  starts_at: string
+  ends_at: string
+  is_initial_meet: boolean
+  created_at: string
+}
+
+export interface AttendanceRecord {
+  id: string
+  session_id: string
+  intern_id: string
+  status: 'present'
+  marked_at: string
+  marked_by: string | null
+}
+
+export interface ProjectAssignment {
+  project_id: string
+  intern_id: string
+  assigned_at: string
 }
 
 export type AppRole = 'admin' | 'member'

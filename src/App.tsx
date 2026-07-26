@@ -6,6 +6,8 @@ import { Layout } from './components/Layout'
 import { AuthPage } from './pages/AuthPage'
 import { PortfolioPage } from './pages/PortfolioPage'
 import { BoardPage } from './pages/BoardPage'
+import { TeamsPage } from './pages/TeamsPage'
+import { AttendancePage } from './pages/AttendancePage'
 import { AdminPage } from './pages/AdminPage'
 
 export default function App() {
@@ -27,6 +29,8 @@ export default function App() {
             }
           >
             <Route path="/" element={<PortfolioPage />} />
+            <Route path="/teams" element={<TeamsPage />} />
+            <Route path="/attendance" element={<AttendancePage />} />
             <Route path="/project/:id" element={<BoardPage />} />
             <Route
               path="/admin"

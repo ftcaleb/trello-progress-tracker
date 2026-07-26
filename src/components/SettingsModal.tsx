@@ -11,7 +11,14 @@ export function SettingsModal({
   project: Project
   onSave: (
     patch: Partial<
-      Pick<Project, 'name' | 'description' | 'standup_day' | 'standup_time'>
+      Pick<
+        Project,
+        | 'name'
+        | 'description'
+        | 'standup_day'
+        | 'standup_time'
+        | 'initial_meet_date'
+      >
     >,
   ) => void
   onClose: () => void
@@ -23,12 +30,16 @@ export function SettingsModal({
   const [standupTime, setStandupTime] = useState(
     (project.standup_time ?? '10:00').slice(0, 5),
   )
+  const [initialMeetDate, setInitialMeetDate] = useState(
+    project.initial_meet_date ?? '',
+  )
 
   const resetFromProject = () => {
     setName(project.name)
     setDescription(project.description ?? '')
     setStandupDay(project.standup_day)
     setStandupTime((project.standup_time ?? '10:00').slice(0, 5))
+    setInitialMeetDate(project.initial_meet_date ?? '')
   }
 
   const startEdit = () => {
@@ -48,6 +59,7 @@ export function SettingsModal({
       description: description.trim() || null,
       standup_day: standupDay,
       standup_time: standupTime,
+      initial_meet_date: initialMeetDate || null,
     })
     setEditing(false)
   }
@@ -137,6 +149,32 @@ export function SettingsModal({
             )}
           </Field>
         </div>
+
+        <Field label="Initial meet date">
+          {editing ? (
+            <>
+              <input
+                type="date"
+                value={initialMeetDate}
+                onChange={(e) => setInitialMeetDate(e.target.value)}
+                className="w-full rounded-xl border border-navy-200 bg-white px-3 py-2.5 text-sm text-navy-900 outline-none transition focus:border-sunburst-500 focus:ring-4 focus:ring-sunburst-500/15"
+              />
+              <p className="mt-1.5 text-xs text-navy-400">
+                The first standup ("Project Initial Meet"). Setting this
+                generates the weekly attendance register for 3 months from this
+                date. A meet that has already occurred can't be moved.
+              </p>
+            </>
+          ) : (
+            <p className="text-sm font-medium text-navy-900">
+              {project.initial_meet_date || (
+                <span className="italic text-navy-300">
+                  Not set — no register yet
+                </span>
+              )}
+            </p>
+          )}
+        </Field>
 
         {editing ? (
           <div className="flex justify-end gap-2 border-t border-navy-100 pt-4">
