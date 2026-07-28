@@ -1,23 +1,33 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useToast } from '../components/Toast'
-import { useInterns } from './useInterns'
 import { ROLE_ORDER } from '../types'
-import type { Intern, Project, ProjectIntern, Team } from '../types'
+import type { Intern, Project, Role, Team } from '../types'
+
+/** One row of the public teams_overview view (display fields only). */
+interface OverviewRow {
+  team_id: string
+  project_id: string
+  project_name: string
+  intern_id: string | null
+  intern_name: string | null
+  intern_initials: string | null
+  intern_role: Role | null
+}
 
 interface TeamsState {
   teams: Team[]
+  overview: OverviewRow[]
+  /** All projects the viewer may see (admin: all) — for the add/move picker. */
   projects: Project[]
-  assignments: ProjectIntern[]
 }
 
-const EMPTY: TeamsState = { teams: [], projects: [], assignments: [] }
+const EMPTY: TeamsState = { teams: [], overview: [], projects: [] }
 
 function msg(e: unknown): string {
   return e instanceof Error ? e.message : 'unknown error'
 }
 
-/** Order interns by role (dev → designer → cyber), then by name. */
 function internSort(a: Intern, b: Intern): number {
   const ra = ROLE_ORDER.indexOf(a.role)
   const rb = ROLE_ORDER.indexOf(b.role)
@@ -25,37 +35,50 @@ function internSort(a: Intern, b: Intern): number {
   return a.name.localeCompare(b.name)
 }
 
+/** Build a display-only Project from a view row (fields the Teams UI reads). */
+function toProject(teamId: string | null, id: string, name: string): Project {
+  return {
+    id,
+    name,
+    team_id: teamId,
+    description: null,
+    standup_day: '',
+    standup_time: '',
+    initial_meet_date: null,
+    created_at: '',
+  }
+}
+
 /**
- * Groups are now a lens over REAL data — a group is its assigned projects
- * (projects.team_id) and the interns working on those projects
- * (project_interns). There is no separate team roster or project label; the
- * whole app shares one source of truth.
+ * Groups are a lens over REAL data. Display data is read from the public
+ * `teams_overview` view (so every signed-in user sees the full showcase,
+ * read-only), while admin mutations write to the underlying tables. One
+ * source of truth, no drift, base-table RLS untouched.
  */
 export function useTeams() {
   const toast = useToast()
-  const { interns } = useInterns()
   const [state, setState] = useState<TeamsState>(EMPTY)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
 
-  const { teams, projects, assignments } = state
+  const { teams, overview, projects } = state
 
   const loadAll = useCallback(async () => {
     setLoading(true)
     setLoadError(null)
     try {
-      const [teamsR, projectsR, assignmentsR] = await Promise.all([
+      const [teamsR, overviewR, projectsR] = await Promise.all([
         supabase.from('teams').select('*').order('position'),
+        supabase.from('teams_overview').select('*'),
         supabase.from('projects').select('*').order('name'),
-        supabase.from('project_interns').select('*'),
       ])
       if (teamsR.error) throw teamsR.error
+      if (overviewR.error) throw overviewR.error
       if (projectsR.error) throw projectsR.error
-      if (assignmentsR.error) throw assignmentsR.error
       setState({
         teams: (teamsR.data as Team[]) ?? [],
+        overview: (overviewR.data as OverviewRow[]) ?? [],
         projects: (projectsR.data as Project[]) ?? [],
-        assignments: (assignmentsR.data as ProjectIntern[]) ?? [],
       })
     } catch (e) {
       setLoadError(e instanceof Error ? e.message : 'Failed to load teams.')
@@ -77,34 +100,42 @@ export function useTeams() {
     [teams],
   )
 
-  const internById = useMemo(
-    () => new Map(interns.map((i) => [i.id, i])),
-    [interns],
-  )
-
   const projectsByTeam = useMemo(() => {
     const m = new Map<string, Project[]>()
     for (const t of teams) m.set(t.id, [])
-    for (const p of projects) {
-      if (p.team_id && m.has(p.team_id)) m.get(p.team_id)!.push(p)
+    const seen = new Set<string>()
+    for (const r of overview) {
+      if (seen.has(r.project_id)) continue
+      seen.add(r.project_id)
+      const list = m.get(r.team_id)
+      if (list) list.push(toProject(r.team_id, r.project_id, r.project_name))
     }
     for (const list of m.values())
       list.sort((a, b) => a.name.localeCompare(b.name))
     return m
-  }, [projects, teams])
+  }, [overview, teams])
 
   const internsByProject = useMemo(() => {
     const m = new Map<string, Intern[]>()
-    for (const a of assignments) {
-      const intern = internById.get(a.intern_id)
-      if (!intern) continue
-      const list = m.get(a.project_id) ?? []
-      list.push(intern)
-      m.set(a.project_id, list)
+    const seen = new Set<string>()
+    for (const r of overview) {
+      if (!r.intern_id || !r.intern_role) continue
+      const key = `${r.project_id}:${r.intern_id}`
+      if (seen.has(key)) continue
+      seen.add(key)
+      const list = m.get(r.project_id) ?? []
+      list.push({
+        id: r.intern_id,
+        name: r.intern_name ?? '',
+        initials: r.intern_initials ?? '',
+        role: r.intern_role,
+        moodle_user_id: null,
+      })
+      m.set(r.project_id, list)
     }
     for (const list of m.values()) list.sort(internSort)
     return m
-  }, [assignments, internById])
+  }, [overview])
 
   /** A group's people = every intern on any of its projects (deduped). */
   const internsByTeam = useMemo(() => {
@@ -126,7 +157,7 @@ export function useTeams() {
     return m
   }, [teams, projectsByTeam, internsByProject])
 
-  // ---- Team mutations -----------------------------------------------------
+  // ---- Team mutations (admin) --------------------------------------------
   const createTeam = useCallback(
     async (name: string) => {
       const trimmed = name.trim()
@@ -177,8 +208,8 @@ export function useTeams() {
     async (teamId: string) => {
       const snapshot = state
       setState((s) => ({
-        ...s,
         teams: s.teams.filter((t) => t.id !== teamId),
+        overview: s.overview.filter((r) => r.team_id !== teamId),
         projects: s.projects.map((p) =>
           p.team_id === teamId ? { ...p, team_id: null } : p,
         ),
@@ -194,7 +225,6 @@ export function useTeams() {
     [state, toast],
   )
 
-  /** Persist a new left-to-right ordering of team ids. */
   const reorderTeams = useCallback(
     async (orderedIds: string[]) => {
       const snapshot = teams
@@ -221,16 +251,24 @@ export function useTeams() {
     [teams, toast],
   )
 
-  // ---- Project ↔ group link ----------------------------------------------
+  // ---- Project <-> group link (admin) ------------------------------------
   /** Assign / move a project to a group (null = Unassigned). */
   const setProjectTeam = useCallback(
     async (projectId: string, teamId: string | null) => {
-      const snapshot = projects
+      const snapshot = state
       setState((s) => ({
         ...s,
         projects: s.projects.map((p) =>
           p.id === projectId ? { ...p, team_id: teamId } : p,
         ),
+        // Keep the showcase in sync: move the project's rows to the new group,
+        // or drop them if it was unassigned.
+        overview:
+          teamId === null
+            ? s.overview.filter((r) => r.project_id !== projectId)
+            : s.overview.map((r) =>
+                r.project_id === projectId ? { ...r, team_id: teamId } : r,
+              ),
       }))
       try {
         const { error } = await supabase
@@ -238,12 +276,14 @@ export function useTeams() {
           .update({ team_id: teamId })
           .eq('id', projectId)
         if (error) throw error
+        // Re-pull so a newly-assigned project brings its members into view.
+        void loadAll()
       } catch (e) {
-        setState((s) => ({ ...s, projects: snapshot }))
+        setState(snapshot)
         toast.error(`Could not move project: ${msg(e)}`)
       }
     },
-    [projects, toast],
+    [state, toast, loadAll],
   )
 
   return {
