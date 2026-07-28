@@ -7,7 +7,7 @@ import { useAuth } from '../hooks/useAuth'
 import { AvatarStack } from './Avatar'
 import { AssignPopover } from './AssignPopover'
 import { Popover } from './Popover'
-import { ClockIcon, FileTextIcon } from './icons'
+import { ClockIcon, FileTextIcon, TrashIcon } from './icons'
 
 export function ProjectCardTile({
   project,
@@ -146,7 +146,7 @@ export function ProjectCardTile({
                     }}
                     className="flex w-full items-center gap-2 px-3 py-2.5 text-sm font-medium text-st-cancelled-fg transition hover:bg-st-cancelled-bg"
                   >
-                    <span aria-hidden="true">🗑</span> Delete project
+                    <TrashIcon size={14} /> Delete project
                   </button>
                 )}
               </Popover>

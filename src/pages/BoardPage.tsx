@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { AlertTriangleIcon, SettingsIcon } from '../components/icons'
 import {
   DndContext,
   DragOverlay,
@@ -276,9 +277,9 @@ export function BoardPage() {
           {isAdmin ? (
             <button
               onClick={() => setSettingsOpen(true)}
-              className="rounded-lg border border-line-2 px-3 py-1.5 text-sm font-medium text-ink-2 transition hover:bg-surface-2"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-line-2 px-3 py-1.5 text-sm font-medium text-ink-2 transition hover:bg-surface-2"
             >
-              ⚙ Settings
+              <SettingsIcon size={15} /> Settings
             </button>
           ) : null}
         </div>
@@ -397,7 +398,9 @@ function BoardError({
   return (
     <div className="flex h-full items-center justify-center p-6">
       <div className="max-w-md rounded-2xl border border-st-pending bg-st-pending-bg p-8 text-center">
-        <div className="mb-2 text-2xl">⚠️</div>
+        <div className="mb-2 flex justify-center text-st-pending">
+          <AlertTriangleIcon size={26} />
+        </div>
         <h2 className="text-lg font-bold text-ink">
           Could not load this project
         </h2>

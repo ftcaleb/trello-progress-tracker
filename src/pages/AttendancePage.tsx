@@ -2,6 +2,13 @@ import { useEffect, useMemo, useState } from 'react'
 import { useAttendance, type UseAttendance } from '../hooks/useAttendance'
 import { useAuth } from '../hooks/useAuth'
 import { Modal } from '../components/Modal'
+import {
+  CalendarIcon,
+  DownloadIcon,
+  LinkIcon,
+  LockIcon,
+  StarIcon,
+} from '../components/icons'
 import { ROLE_LABELS, type Intern, type Project, type StandupSession } from '../types'
 
 const SAST = 'Africa/Johannesburg'
@@ -50,7 +57,7 @@ export function AttendancePage() {
               onClick={() => void att.exportCsv()}
               className="inline-flex items-center gap-2 rounded-xl bg-rail px-4 py-2.5 text-sm font-semibold text-rail-ink shadow-e1 transition hover:opacity-90"
             >
-              <span aria-hidden="true">⬇</span> Export CSV
+              <DownloadIcon size={16} /> Export CSV
             </button>
           ) : null}
         </div>
@@ -73,7 +80,9 @@ function MemberView({ att }: { att: UseAttendance }) {
   if (!att.isLinked) {
     return (
       <div className="mx-auto max-w-md rounded-2xl border border-st-pending bg-st-pending-bg p-8 text-center">
-        <div className="mb-2 text-2xl">🔗</div>
+        <div className="mb-2 flex justify-center text-st-pending">
+          <LinkIcon size={26} />
+        </div>
         <h2 className="text-lg font-bold text-ink">
           Your account isn't linked yet
         </h2>
@@ -92,8 +101,8 @@ function MemberView({ att }: { att: UseAttendance }) {
   if (projects.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-line-2 bg-surface py-16 text-center">
-        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-sunburst-400 to-maroon-600 text-xl">
-          🗓️
+        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-sunburst-400 to-maroon-600">
+          <CalendarIcon size={22} className="text-white" />
         </div>
         <h2 className="text-lg font-bold text-ink">
           No standups scheduled yet
@@ -174,7 +183,8 @@ function MemberSessionRow({
           </span>
         ) : st === 'upcoming' ? (
           <span className="inline-flex items-center gap-1 rounded-lg bg-surface-3 px-2.5 py-1.5 text-xs font-medium text-ink-3">
-            🔒 Opens {day(session.starts_at)} {time(session.starts_at)}
+            <LockIcon size={12} /> Opens {day(session.starts_at)}{' '}
+            {time(session.starts_at)}
           </span>
         ) : st === 'na' ? (
           <span className="inline-flex items-center rounded-lg border border-dashed border-line-2 px-2.5 py-1.5 text-xs font-medium text-ink-3">
@@ -336,7 +346,11 @@ function ProjectMatrix({
                   }
                 >
                   <div>{day(s.starts_at).split(' ').slice(1).join(' ')}</div>
-                  {s.is_initial_meet ? <div>★ Meet</div> : null}
+                  {s.is_initial_meet ? (
+                    <div className="inline-flex items-center gap-0.5">
+                      <StarIcon size={9} /> Meet
+                    </div>
+                  ) : null}
                 </th>
               ))}
             </tr>

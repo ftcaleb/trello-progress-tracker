@@ -4,7 +4,7 @@ import { useInterns } from '../hooks/useInterns'
 import { useAuth } from '../hooks/useAuth'
 import { ProjectCardTile } from '../components/ProjectCardTile'
 import { Modal } from '../components/Modal'
-import { CopyIcon } from '../components/icons'
+import { AlertTriangleIcon, CopyIcon, FolderIcon } from '../components/icons'
 import type { Team } from '../types'
 
 export function PortfolioPage() {
@@ -225,8 +225,8 @@ function SkeletonGrid() {
 function EmptyState() {
   return (
     <div className="rounded-2xl border border-dashed border-line-2 bg-surface py-16 text-center">
-      <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-sunburst-400 to-maroon-600 text-xl">
-        📋
+      <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-sunburst-400 to-maroon-600">
+        <FolderIcon size={22} className="text-white" />
       </div>
       <h2 className="text-lg font-bold text-ink">No projects found</h2>
       <p className="mt-1 text-sm text-ink-3">
@@ -245,7 +245,9 @@ function ErrorState({
 }) {
   return (
     <div className="mx-auto max-w-md rounded-2xl border border-st-pending bg-st-pending-bg p-8 text-center">
-      <div className="mb-2 text-2xl">⚠️</div>
+      <div className="mb-2 flex justify-center text-st-pending">
+        <AlertTriangleIcon size={26} />
+      </div>
       <h2 className="text-lg font-bold text-ink">
         Could not load the portfolio
       </h2>

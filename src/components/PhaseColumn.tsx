@@ -4,6 +4,7 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import type { Phase, Task } from '../types'
 import type { UseProjectBoard } from '../hooks/useProjectBoard'
 import { TaskCard } from './TaskCard'
+import { FileTextIcon, LockIcon } from './icons'
 
 export function PhaseColumn({
   phase,
@@ -116,8 +117,8 @@ export function PhaseColumn({
             ) : (
               <div className="flex items-center gap-1.5">
                 {locked ? (
-                  <span title="Locked — clear this phase first" aria-hidden="true">
-                    🔒
+                  <span title="Locked — clear this phase first" className="text-ink-3">
+                    <LockIcon size={13} />
                   </span>
                 ) : null}
                 <span
@@ -157,7 +158,7 @@ export function PhaseColumn({
                       }}
                       className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-ink-2 transition hover:bg-surface-2"
                     >
-                      <span aria-hidden="true">📄</span>
+                      <FileTextIcon size={15} />
                       {hasReport ? 'View report' : 'Generate report'}
                     </button>
                     {isAdmin ? (
@@ -207,7 +208,7 @@ export function PhaseColumn({
                 title={hasReport ? 'View phase report' : 'Generate phase report'}
                 className="inline-flex items-center gap-1 rounded-lg border border-line-2 bg-surface px-2 py-1 text-xs font-semibold text-ink-2 shadow-e1 transition hover:border-sunburst-400 hover:text-sunburst-600"
               >
-                📄 Report
+                <FileTextIcon size={13} /> Report
               </button>
               {isAdmin ? (
                 isLast ? (

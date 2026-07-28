@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { TaskStatus } from '../types'
 import { STATUS_LABELS, STATUS_ORDER } from '../types'
+import { AlertTriangleIcon } from './icons'
 
 // Visual identity per status.
 const triggerClass: Record<TaskStatus, string> = {
@@ -21,7 +22,7 @@ const MENU_WIDTH = 160
 
 function StatusIcon({ status }: { status: TaskStatus }) {
   if (status === 'approved') return <span aria-hidden="true">✓</span>
-  if (status === 'blocked') return <span aria-hidden="true">⚠</span>
+  if (status === 'blocked') return <AlertTriangleIcon size={12} />
   return <span className={`h-2 w-2 rounded-full ${dotClass[status]}`} />
 }
 

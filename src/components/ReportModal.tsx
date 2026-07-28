@@ -3,6 +3,7 @@ import type { Phase } from '../types'
 import type { UseProjectBoard } from '../hooks/useProjectBoard'
 import { Modal } from './Modal'
 import { useToast } from './Toast'
+import { FileTextIcon, PencilIcon } from './icons'
 
 function formatTimestamp(iso: string): string {
   const d = new Date(iso)
@@ -91,7 +92,7 @@ export function ReportModal({
       maxWidth="max-w-2xl"
       title={
         <span className="flex items-center gap-2">
-          <span aria-hidden="true">📄</span> Phase Report
+          <FileTextIcon size={17} /> Phase Report
         </span>
       }
       subtitle={`${board.project?.name ?? ''} · ${phase.name} · Week ${phase.week_number}`}
@@ -216,8 +217,8 @@ function GeneratingState() {
 function EmptyState({ onGenerate }: { onGenerate: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center py-10 text-center">
-      <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-sunburst-400 to-maroon-600 text-xl">
-        ✍️
+      <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-sunburst-400 to-maroon-600">
+        <PencilIcon size={22} className="text-white" />
       </div>
       <h3 className="text-base font-bold text-ink">No report yet</h3>
       <p className="mt-1 max-w-xs text-sm text-ink-3">
