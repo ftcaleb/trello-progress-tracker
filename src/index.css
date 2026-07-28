@@ -2,6 +2,145 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================================
+   DESIGN SYSTEM — PORTABLE TOKENS
+   Brand-continuous (Melsoft): navy ink #0a1733, maroon #5e0743,
+   orange #ff7300, purple #720075. Zero hardcoded hex in components — every
+   rendered color reads a token. Dark theme = a pure token swap on
+   :root[data-theme="dark"]. Display font uses a serif fallback stack
+   (Canela not bundled).
+   ========================================================================== */
+
+:root {
+  /* Brand constants — mode-invariant, never change */
+  --brand-ink: #0a1733;
+  --brand-ink-deep: #060e22;
+  --brand-maroon: #5e0743;
+  --brand-orange: #ff7300;
+  --brand-purple: #720075;
+
+  /* Planes & surfaces */
+  --plane: #f4f6fb;
+  --surface: #ffffff;
+  --surface-2: #f7f8fb;
+  --surface-3: #eef1f7;
+
+  /* Nav rail — always deep navy */
+  --rail: #0a1733;
+  --rail-ink: #ffffff;
+  --rail-ink-2: rgba(255, 255, 255, 0.62);
+  --rail-ink-3: rgba(255, 255, 255, 0.38);
+  --rail-line: rgba(255, 255, 255, 0.1);
+  --rail-active: rgba(255, 255, 255, 0.1);
+
+  /* Text ink ramp */
+  --text-1: #0a1733;
+  --text-2: #5b6478;
+  --text-3: #8a93a8;
+  --text-inverse: #ffffff;
+
+  /* Lines & elevation */
+  --line: #e5e8f0;
+  --line-2: #ccd2df;
+  --line-strong: rgba(10, 23, 51, 0.14);
+  --shadow-sm: 0 1px 2px rgba(10, 23, 51, 0.05), 0 2px 8px -4px rgba(10, 23, 51, 0.08);
+  --shadow-md: 0 6px 24px -12px rgba(10, 23, 51, 0.18);
+  --shadow-lg: 0 26px 50px -20px rgba(10, 23, 51, 0.24);
+  --shadow-xl: 0 40px 90px -30px rgba(10, 23, 51, 0.38);
+  --shadow-accent: 0 14px 32px -14px rgba(94, 7, 67, 0.5);
+
+  /* Accent — interactive maroon */
+  --accent: #5e0743;
+  --accent-hover: #4b0536;
+  --accent-ink: #ffffff;
+  --accent-wash: rgba(94, 7, 67, 0.08);
+  --accent-wash-2: rgba(94, 7, 67, 0.14);
+  --accent-ring: rgba(94, 7, 67, 0.28);
+  --focus-ring: rgba(94, 7, 67, 0.35);
+
+  /* Data-viz — maroon ordinal ramp (validated) */
+  --viz-1: #c96fa2;
+  --viz-2: #a8497f;
+  --viz-3: #832a5e;
+  --viz-4: #5e0743;
+  --viz-series: #5e0743;
+  --viz-series-soft: rgba(94, 7, 67, 0.12);
+  --viz-grid: #e9ecf3;
+  --viz-axis: #ccd2df;
+  --viz-muted: #8a93a8;
+
+  /* Status scale — dot / bg / fg per status */
+  --st-applied: #7c8aa5;   --st-applied-bg: #eef1f7;   --st-applied-fg: #475569;
+  --st-pending: #d9930b;   --st-pending-bg: #fff3dc;   --st-pending-fg: #a16207;
+  --st-approved: #16a34a;  --st-approved-bg: #dcfce7;  --st-approved-fg: #15803d;
+  --st-cancelled: #d03b3b; --st-cancelled-bg: #fde8e8; --st-cancelled-fg: #b42318;
+  --st-paid: #720075;      --st-paid-bg: #f4e4f5;      --st-paid-fg: #6b0a6e;
+
+  /* Fonts */
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+
+  /* Radii */
+  --radius-chip: 8px;
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-xl: 26px;
+  --radius-pill: 100px;
+}
+
+:root[data-theme="dark"] {
+  /* Planes & rail */
+  --plane: #070d1c;
+  --surface: #101b38;
+  --surface-2: #1623444d;
+  --surface-3: #1c2a4d;
+  --rail: #0a1225;
+  --rail-line: rgba(255, 255, 255, 0.07);
+
+  /* Text */
+  --text-1: #f2f5fc;
+  --text-2: #a6b1c9;
+  --text-3: #74809a;
+
+  /* Lines & shadows */
+  --line: #1f2c4e;
+  --line-2: #2a3a63;
+  --line-strong: rgba(255, 255, 255, 0.14);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 6px 24px -12px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 26px 50px -20px rgba(0, 0, 0, 0.7);
+  --shadow-xl: 0 40px 90px -30px rgba(0, 0, 0, 0.8);
+  --shadow-accent: 0 14px 32px -14px rgba(168, 73, 127, 0.55);
+
+  /* Accent — steps up the same hue (lighter pink-maroon) */
+  --accent: #c96fa2;
+  --accent-hover: #d98cb6;
+  --accent-ink: #1a0512;
+  --accent-wash: rgba(201, 111, 162, 0.14);
+  --accent-wash-2: rgba(201, 111, 162, 0.22);
+  --accent-ring: rgba(201, 111, 162, 0.4);
+  --focus-ring: rgba(201, 111, 162, 0.5);
+
+  /* Data-viz — re-validated against #101b38 */
+  --viz-1: #f0c4dd;
+  --viz-2: #e19cc4;
+  --viz-3: #c96fa2;
+  --viz-4: #a8497f;
+  --viz-series: #d98cb6;
+  --viz-series-soft: rgba(217, 140, 182, 0.16);
+  --viz-grid: #1c2a4d;
+  --viz-axis: #2a3a63;
+  --viz-muted: #74809a;
+
+  /* Status (dark) */
+  --st-applied: #94a3c4;   --st-applied-bg: #1c2a4d;   --st-applied-fg: #b9c4dc;
+  --st-pending: #f4b740;   --st-pending-bg: #33270c;   --st-pending-fg: #f7cd77;
+  --st-approved: #3fcf8e;  --st-approved-bg: #0d2f22;  --st-approved-fg: #6fe0ab;
+  --st-cancelled: #f97066; --st-cancelled-bg: #3a1512; --st-cancelled-fg: #fda29b;
+  --st-paid: #d99ada;      --st-paid-bg: #2c1030;      --st-paid-fg: #e5b8e6;
+}
+
 @layer base {
   html,
   body,
@@ -11,41 +150,72 @@
 
   body {
     margin: 0;
-    /* Soft off-white with a faint navy tint */
-    background-color: #f5f7fc;
-    color: #101d3c;
-    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
-      Roboto, Helvetica, Arial, sans-serif;
+    background: var(--plane);
+    color: var(--text-1);
+    font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    /* Inter character variants */
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  ::selection {
+    background: var(--accent-wash-2);
+    color: var(--text-1);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+@layer components {
+  /* Card primitive — background + border + radius + soft elevation */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+  /* Edge-to-edge tables/charts clip to the card radius */
+  .card-flush {
+    overflow: hidden;
   }
 }
 
 @layer utilities {
   .fi-scroll {
     scrollbar-width: thin;
-    scrollbar-color: rgba(10, 23, 51, 0.2) transparent;
+    scrollbar-color: var(--line-2) transparent;
   }
   .fi-scroll::-webkit-scrollbar {
     height: 10px;
     width: 10px;
   }
   .fi-scroll::-webkit-scrollbar-thumb {
-    background: rgba(10, 23, 51, 0.18);
+    background: var(--line-2);
     border-radius: 9999px;
   }
   .fi-scroll::-webkit-scrollbar-thumb:hover {
-    background: rgba(10, 23, 51, 0.3);
+    background: var(--line-strong);
   }
   .fi-scroll::-webkit-scrollbar-track {
     background: transparent;
+  }
+
+  /* Display serif — headings and figures only */
+  .font-display {
+    font-family: var(--font-display);
   }
 
   /* Skeleton shimmer */
   .fi-skeleton {
     position: relative;
     overflow: hidden;
-    background: #e7ebf5;
+    background: var(--surface-3);
   }
   .fi-skeleton::after {
     content: '';
@@ -64,5 +234,35 @@
     100% {
       transform: translateX(100%);
     }
+  }
+}
+
+/* Reduced motion — disable non-essential animation/transition */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Print — history/registers are meant to print: flatten cards, avoid breaks */
+@media print {
+  :root {
+    --plane: #ffffff;
+  }
+  body {
+    background: #ffffff;
+  }
+  .card {
+    box-shadow: none !important;
+    border-color: #d7dbe5 !important;
+    break-inside: avoid;
+  }
+  .fi-no-print {
+    display: none !important;
   }
 }

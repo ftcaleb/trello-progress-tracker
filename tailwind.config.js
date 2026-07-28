@@ -1,9 +1,77 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  // Dark mode is driven by the data-theme attribute (token swap on :root),
+  // not the OS media query — so `dark:` utilities also key off it.
+  darkMode: ['selector', '[data-theme="dark"]'],
   theme: {
     extend: {
       colors: {
+        /* ---- Design-system semantic tokens (CSS-variable backed) ----
+           Every value reads a var() so dark mode is a pure token swap.
+           These are additive; the navy/maroon/sunburst scales below are
+           kept intact so existing utilities never change. */
+        plane: 'var(--plane)',
+        surface: {
+          DEFAULT: 'var(--surface)',
+          2: 'var(--surface-2)',
+          3: 'var(--surface-3)',
+        },
+        ink: {
+          DEFAULT: 'var(--text-1)',
+          2: 'var(--text-2)',
+          3: 'var(--text-3)',
+          inverse: 'var(--text-inverse)',
+        },
+        line: {
+          DEFAULT: 'var(--line)',
+          2: 'var(--line-2)',
+          strong: 'var(--line-strong)',
+        },
+        rail: {
+          DEFAULT: 'var(--rail)',
+          ink: 'var(--rail-ink)',
+          'ink-2': 'var(--rail-ink-2)',
+          'ink-3': 'var(--rail-ink-3)',
+          line: 'var(--rail-line)',
+          active: 'var(--rail-active)',
+        },
+        accent: {
+          DEFAULT: 'var(--accent)',
+          hover: 'var(--accent-hover)',
+          ink: 'var(--accent-ink)',
+          wash: 'var(--accent-wash)',
+          'wash-2': 'var(--accent-wash-2)',
+          ring: 'var(--accent-ring)',
+        },
+        viz: {
+          1: 'var(--viz-1)',
+          2: 'var(--viz-2)',
+          3: 'var(--viz-3)',
+          4: 'var(--viz-4)',
+          series: 'var(--viz-series)',
+          'series-soft': 'var(--viz-series-soft)',
+          grid: 'var(--viz-grid)',
+          axis: 'var(--viz-axis)',
+          muted: 'var(--viz-muted)',
+        },
+        st: {
+          applied: 'var(--st-applied)',
+          'applied-bg': 'var(--st-applied-bg)',
+          'applied-fg': 'var(--st-applied-fg)',
+          pending: 'var(--st-pending)',
+          'pending-bg': 'var(--st-pending-bg)',
+          'pending-fg': 'var(--st-pending-fg)',
+          approved: 'var(--st-approved)',
+          'approved-bg': 'var(--st-approved-bg)',
+          'approved-fg': 'var(--st-approved-fg)',
+          cancelled: 'var(--st-cancelled)',
+          'cancelled-bg': 'var(--st-cancelled-bg)',
+          'cancelled-fg': 'var(--st-cancelled-fg)',
+          paid: 'var(--st-paid)',
+          'paid-bg': 'var(--st-paid-bg)',
+          'paid-fg': 'var(--st-paid-fg)',
+        },
         navy: {
           50: '#f4f6fb',
           100: '#e7ebf5',
@@ -56,16 +124,33 @@ export default {
           'Arial',
           'sans-serif',
         ],
+        display: [
+          'Iowan Old Style',
+          'Palatino Linotype',
+          'Palatino',
+          'Georgia',
+          'serif',
+        ],
       },
       borderRadius: {
         xl: '0.85rem',
         '2xl': '1.1rem',
+        /* Design-system radii (additive) */
+        chip: 'var(--radius-chip)',
+        card: 'var(--radius-lg)',
+        pill: 'var(--radius-pill)',
       },
       boxShadow: {
         card: '0 1px 2px rgba(10, 23, 51, 0.06), 0 6px 20px -12px rgba(10, 23, 51, 0.25)',
         lift: '0 6px 16px -6px rgba(10, 23, 51, 0.22), 0 18px 40px -20px rgba(10, 23, 51, 0.35)',
         modal: '0 24px 60px -18px rgba(10, 23, 51, 0.45)',
         pop: '0 10px 32px -8px rgba(10, 23, 51, 0.28)',
+        /* Design-system elevation tokens (additive, CSS-variable backed) */
+        e1: 'var(--shadow-sm)',
+        e2: 'var(--shadow-md)',
+        e3: 'var(--shadow-lg)',
+        e4: 'var(--shadow-xl)',
+        accent: 'var(--shadow-accent)',
       },
       keyframes: {
         shake: {

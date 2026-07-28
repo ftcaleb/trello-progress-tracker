@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
+import { ThemeProvider } from './hooks/useTheme'
 import { AuthProvider, RequireAuth, RequireAdmin } from './hooks/useAuth'
 import { InternsProvider } from './hooks/useInterns'
 import { ToastProvider } from './components/Toast'
@@ -12,8 +13,9 @@ import { AdminPage } from './pages/AdminPage'
 
 export default function App() {
   return (
-    <ToastProvider>
-      <AuthProvider>
+    <ThemeProvider>
+      <ToastProvider>
+        <AuthProvider>
         <Routes>
           <Route path="/login" element={<AuthPage />} />
           {/* Signup is disabled — this is a single-account tool. */}
@@ -44,7 +46,8 @@ export default function App() {
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </AuthProvider>
-    </ToastProvider>
+        </AuthProvider>
+      </ToastProvider>
+    </ThemeProvider>
   )
 }
