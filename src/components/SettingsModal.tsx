@@ -88,10 +88,10 @@ export function SettingsModal({
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-xl border border-navy-200 bg-white px-3.5 py-2.5 text-sm text-navy-900 outline-none transition focus:border-sunburst-500 focus:ring-4 focus:ring-sunburst-500/15"
+              className="w-full rounded-xl border border-line-2 bg-surface px-3.5 py-2.5 text-sm text-ink outline-none transition focus:border-sunburst-500 focus:ring-4 focus:ring-sunburst-500/15"
             />
           ) : (
-            <p className="text-sm font-medium text-navy-900">{project.name}</p>
+            <p className="text-sm font-medium text-ink">{project.name}</p>
           )}
         </Field>
 
@@ -102,12 +102,12 @@ export function SettingsModal({
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
               placeholder="Add a description…"
-              className="w-full resize-y rounded-xl border border-navy-200 bg-white px-3.5 py-2.5 text-sm text-navy-900 outline-none transition placeholder:text-navy-300 focus:border-sunburst-500 focus:ring-4 focus:ring-sunburst-500/15"
+              className="w-full resize-y rounded-xl border border-line-2 bg-surface px-3.5 py-2.5 text-sm text-ink outline-none transition placeholder:text-ink-3 focus:border-sunburst-500 focus:ring-4 focus:ring-sunburst-500/15"
             />
           ) : (
-            <p className="text-sm text-navy-600">
+            <p className="text-sm text-ink-2">
               {project.description || (
-                <span className="italic text-navy-300">No description</span>
+                <span className="italic text-ink-3">No description</span>
               )}
             </p>
           )}
@@ -119,7 +119,7 @@ export function SettingsModal({
               <select
                 value={standupDay}
                 onChange={(e) => setStandupDay(e.target.value)}
-                className="w-full rounded-xl border border-navy-200 bg-white px-3 py-2.5 text-sm text-navy-900 outline-none transition focus:border-sunburst-500 focus:ring-4 focus:ring-sunburst-500/15"
+                className="w-full rounded-xl border border-line-2 bg-surface px-3 py-2.5 text-sm text-ink outline-none transition focus:border-sunburst-500 focus:ring-4 focus:ring-sunburst-500/15"
               >
                 {WEEKDAYS.map((d) => (
                   <option key={d} value={d}>
@@ -128,7 +128,7 @@ export function SettingsModal({
                 ))}
               </select>
             ) : (
-              <p className="text-sm font-medium text-navy-900">
+              <p className="text-sm font-medium text-ink">
                 {project.standup_day}
               </p>
             )}
@@ -140,10 +140,10 @@ export function SettingsModal({
                 type="time"
                 value={standupTime}
                 onChange={(e) => setStandupTime(e.target.value)}
-                className="w-full rounded-xl border border-navy-200 bg-white px-3 py-2.5 text-sm text-navy-900 outline-none transition focus:border-sunburst-500 focus:ring-4 focus:ring-sunburst-500/15"
+                className="w-full rounded-xl border border-line-2 bg-surface px-3 py-2.5 text-sm text-ink outline-none transition focus:border-sunburst-500 focus:ring-4 focus:ring-sunburst-500/15"
               />
             ) : (
-              <p className="text-sm font-medium text-navy-900">
+              <p className="text-sm font-medium text-ink">
                 {(project.standup_time ?? '').slice(0, 5)}
               </p>
             )}
@@ -157,18 +157,18 @@ export function SettingsModal({
                 type="date"
                 value={initialMeetDate}
                 onChange={(e) => setInitialMeetDate(e.target.value)}
-                className="w-full rounded-xl border border-navy-200 bg-white px-3 py-2.5 text-sm text-navy-900 outline-none transition focus:border-sunburst-500 focus:ring-4 focus:ring-sunburst-500/15"
+                className="w-full rounded-xl border border-line-2 bg-surface px-3 py-2.5 text-sm text-ink outline-none transition focus:border-sunburst-500 focus:ring-4 focus:ring-sunburst-500/15"
               />
-              <p className="mt-1.5 text-xs text-navy-400">
+              <p className="mt-1.5 text-xs text-ink-3">
                 The first standup ("Project Initial Meet"). Setting this
                 generates the weekly attendance register for 3 months from this
                 date. A meet that has already occurred can't be moved.
               </p>
             </>
           ) : (
-            <p className="text-sm font-medium text-navy-900">
+            <p className="text-sm font-medium text-ink">
               {project.initial_meet_date || (
-                <span className="italic text-navy-300">
+                <span className="italic text-ink-3">
                   Not set — no register yet
                 </span>
               )}
@@ -177,17 +177,17 @@ export function SettingsModal({
         </Field>
 
         {editing ? (
-          <div className="flex justify-end gap-2 border-t border-navy-100 pt-4">
+          <div className="flex justify-end gap-2 border-t border-line pt-4">
             <button
               onClick={cancel}
-              className="rounded-xl px-4 py-2 text-sm font-medium text-navy-600 transition hover:bg-navy-50"
+              className="rounded-xl px-4 py-2 text-sm font-medium text-ink-2 transition hover:bg-surface-2"
             >
               Cancel
             </button>
             <button
               onClick={save}
               disabled={!name.trim()}
-              className="rounded-xl bg-maroon-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-maroon-700 disabled:opacity-50"
+              className="rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-accent-ink transition hover:bg-accent-hover disabled:opacity-50"
             >
               Save changes
             </button>
@@ -207,7 +207,7 @@ function Field({
 }) {
   return (
     <div>
-      <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-navy-400">
+      <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-ink-3">
         {label}
       </label>
       {children}

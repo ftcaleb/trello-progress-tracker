@@ -33,13 +33,13 @@ export function AttendancePage() {
       <div className="mx-auto max-w-[100rem] px-5 py-6 sm:px-8">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-navy-900 sm:text-3xl">
+            <h1 className="font-display text-2xl font-bold tracking-tight text-ink sm:text-3xl">
               Standup{' '}
               <span className="bg-gradient-to-r from-sunburst-500 to-maroon-600 bg-clip-text text-transparent">
                 Attendance
               </span>
             </h1>
-            <p className="mt-1 text-sm text-navy-400">
+            <p className="mt-1 text-sm text-ink-3">
               {isAdmin
                 ? 'Attendance across every project. Click any cell to correct it.'
                 : 'Tick in during your standup. Each session opens only for its scheduled hour.'}
@@ -48,7 +48,7 @@ export function AttendancePage() {
           {isAdmin ? (
             <button
               onClick={() => void att.exportCsv()}
-              className="inline-flex items-center gap-2 rounded-xl bg-navy-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-800"
+              className="inline-flex items-center gap-2 rounded-xl bg-rail px-4 py-2.5 text-sm font-semibold text-rail-ink shadow-e1 transition hover:opacity-90"
             >
               <span aria-hidden="true">⬇</span> Export CSV
             </button>
@@ -72,12 +72,12 @@ function MemberView({ att }: { att: UseAttendance }) {
 
   if (!att.isLinked) {
     return (
-      <div className="mx-auto max-w-md rounded-2xl border border-sunburst-200 bg-sunburst-50/50 p-8 text-center">
+      <div className="mx-auto max-w-md rounded-2xl border border-st-pending bg-st-pending-bg p-8 text-center">
         <div className="mb-2 text-2xl">🔗</div>
-        <h2 className="text-lg font-bold text-navy-900">
+        <h2 className="text-lg font-bold text-ink">
           Your account isn't linked yet
         </h2>
-        <p className="mt-1 text-sm text-navy-500">
+        <p className="mt-1 text-sm text-ink-3">
           Ask an administrator to link your account to your roster record. Once
           linked, your project standups will appear here.
         </p>
@@ -91,14 +91,14 @@ function MemberView({ att }: { att: UseAttendance }) {
 
   if (projects.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-navy-200 bg-white py-16 text-center">
+      <div className="rounded-2xl border border-dashed border-line-2 bg-surface py-16 text-center">
         <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-sunburst-400 to-maroon-600 text-xl">
           🗓️
         </div>
-        <h2 className="text-lg font-bold text-navy-900">
+        <h2 className="text-lg font-bold text-ink">
           No standups scheduled yet
         </h2>
-        <p className="mt-1 text-sm text-navy-400">
+        <p className="mt-1 text-sm text-ink-3">
           When your project's standup schedule is set, your sessions show up
           here.
         </p>
@@ -111,12 +111,12 @@ function MemberView({ att }: { att: UseAttendance }) {
       {projects.map((p) => (
         <div
           key={p.id}
-          className="overflow-hidden rounded-2xl border border-navy-100 bg-white shadow-card"
+          className="overflow-hidden rounded-2xl border border-line bg-surface shadow-e1"
         >
-          <div className="border-b border-navy-100 bg-gradient-to-r from-navy-50 to-white px-4 py-3">
-            <h3 className="text-sm font-extrabold text-navy-900">{p.name}</h3>
+          <div className="border-b border-line bg-gradient-to-r from-surface-2 to-surface px-4 py-3">
+            <h3 className="text-sm font-extrabold text-ink">{p.name}</h3>
           </div>
-          <div className="divide-y divide-navy-50">
+          <div className="divide-y divide-line">
             {(att.sessionsByProject.get(p.id) ?? []).map((s) => (
               <MemberSessionRow key={s.id} session={s} att={att} now={now} />
             ))}
@@ -146,10 +146,10 @@ function MemberSessionRow({
     <div className="flex items-center gap-3 px-4 py-2.5">
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <span className="text-[13px] font-semibold text-navy-800">
+          <span className="text-[13px] font-semibold text-ink">
             {day(session.starts_at)}
           </span>
-          <span className="text-[11px] text-navy-400">
+          <span className="text-[11px] text-ink-3">
             {time(session.starts_at)}–{time(session.ends_at)}
           </span>
           {session.is_initial_meet ? (
@@ -164,24 +164,24 @@ function MemberSessionRow({
         {st === 'open' ? (
           <button
             onClick={() => void att.markAttended(session.id)}
-            className="rounded-lg bg-gradient-to-r from-sunburst-500 to-maroon-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-sm transition hover:brightness-110"
+            className="rounded-lg bg-gradient-to-r from-sunburst-500 to-maroon-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-e1 transition hover:brightness-110"
           >
             ✓ I attended
           </button>
         ) : st === 'marked' ? (
-          <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2.5 py-1.5 text-xs font-semibold text-emerald-700">
+          <span className="inline-flex items-center gap-1 rounded-lg bg-st-approved-bg px-2.5 py-1.5 text-xs font-semibold text-st-approved-fg">
             ✓ Marked{rec ? ` · ${time(rec.marked_at)}` : ''}
           </span>
         ) : st === 'upcoming' ? (
-          <span className="inline-flex items-center gap-1 rounded-lg bg-navy-50 px-2.5 py-1.5 text-xs font-medium text-navy-400">
+          <span className="inline-flex items-center gap-1 rounded-lg bg-surface-3 px-2.5 py-1.5 text-xs font-medium text-ink-3">
             🔒 Opens {day(session.starts_at)} {time(session.starts_at)}
           </span>
         ) : st === 'na' ? (
-          <span className="inline-flex items-center rounded-lg border border-dashed border-navy-200 px-2.5 py-1.5 text-xs font-medium text-navy-300">
+          <span className="inline-flex items-center rounded-lg border border-dashed border-line-2 px-2.5 py-1.5 text-xs font-medium text-ink-3">
             N/A
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1 rounded-lg bg-navy-50 px-2.5 py-1.5 text-xs font-medium text-navy-400">
+          <span className="inline-flex items-center gap-1 rounded-lg bg-surface-3 px-2.5 py-1.5 text-xs font-medium text-ink-3">
             Missed
           </span>
         )}
@@ -215,8 +215,8 @@ function AdminView({ att }: { att: UseAttendance }) {
       ))}
 
       {withoutSessions.length > 0 ? (
-        <div className="rounded-xl border border-dashed border-navy-200 bg-white p-4 text-sm text-navy-400">
-          <span className="font-semibold text-navy-500">
+        <div className="rounded-xl border border-dashed border-line-2 bg-surface p-4 text-sm text-ink-3">
+          <span className="font-semibold text-ink-3">
             No schedule set yet:
           </span>{' '}
           {withoutSessions.map((p) => p.name).join(', ')} — set each project's
@@ -251,30 +251,83 @@ function ProjectMatrix({
       .sort((a, b) => a.name.localeCompare(b.name))
   }, [att, project.id])
 
+  // Derived attendance rate for this project's register (present / marked).
+  const rate = useMemo(() => {
+    let present = 0
+    let absent = 0
+    for (const intern of roster) {
+      for (const s of sessions) {
+        const st = att.cellStatus(s, intern.id)
+        if (st === 'present') present++
+        else if (st === 'absent') absent++
+      }
+    }
+    const marked = present + absent
+    return {
+      present,
+      marked,
+      pct: marked > 0 ? Math.round((present / marked) * 100) : null,
+    }
+  }, [roster, sessions, att])
+
   return (
-    <div className="overflow-hidden rounded-2xl border border-navy-100 bg-white shadow-card">
-      <div className="flex items-center justify-between gap-3 border-b border-navy-100 bg-gradient-to-r from-navy-50 to-white px-4 py-3">
-        <h3 className="text-sm font-extrabold text-navy-900">{project.name}</h3>
-        <button
-          onClick={() => void att.exportCsv(project.id)}
-          className="rounded-lg border border-navy-200 px-2.5 py-1 text-[11px] font-semibold text-navy-600 transition hover:border-sunburst-400 hover:text-sunburst-600"
-        >
-          Export
-        </button>
+    <div className="overflow-hidden rounded-2xl border border-line bg-surface shadow-e1">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-gradient-to-r from-surface-2 to-surface px-4 py-3">
+        <div className="flex items-baseline gap-3">
+          <h3 className="text-sm font-extrabold text-ink">{project.name}</h3>
+          <span className="hidden text-[11px] text-ink-3 sm:inline">
+            <span className="font-bold text-st-approved-fg">✓</span> present
+            {'  ·  '}
+            <span className="font-bold text-st-cancelled-fg">✕</span> absent
+            {'  ·  '}
+            <span className="font-bold">–</span> n/a
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
+          {rate.pct !== null ? (
+            <div
+              className="flex items-center gap-2"
+              title={`${rate.present}/${rate.marked} present across marked sessions`}
+            >
+              <span className="font-display text-base font-bold tabular-nums text-ink">
+                {rate.pct}%
+              </span>
+              <div
+                className="h-1.5 w-16 overflow-hidden rounded-full bg-surface-3"
+                role="meter"
+                aria-valuenow={rate.pct}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label="Attendance rate"
+              >
+                <div
+                  className="h-full rounded-full bg-viz-series transition-[width] duration-500"
+                  style={{ width: `${rate.pct}%` }}
+                />
+              </div>
+            </div>
+          ) : null}
+          <button
+            onClick={() => void att.exportCsv(project.id)}
+            className="rounded-lg border border-line-2 px-2.5 py-1 text-[11px] font-semibold text-ink-2 transition hover:border-sunburst-400 hover:text-sunburst-600"
+          >
+            Export
+          </button>
+        </div>
       </div>
 
       <div className="overflow-x-auto fi-scroll">
         <table className="w-max min-w-full border-collapse text-sm">
           <thead>
             <tr>
-              <th className="sticky left-0 z-10 min-w-[9rem] bg-white px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-navy-400">
+              <th className="sticky left-0 z-10 min-w-[9rem] bg-surface px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-ink-3">
                 Intern
               </th>
               {sessions.map((s) => (
                 <th
                   key={s.id}
                   className={`px-2 py-2 text-center text-[10px] font-semibold ${
-                    s.is_initial_meet ? 'bg-sunburst-50 text-maroon-700' : 'text-navy-400'
+                    s.is_initial_meet ? 'bg-accent-wash text-accent' : 'text-ink-3'
                   }`}
                   title={
                     s.is_initial_meet
@@ -293,19 +346,19 @@ function ProjectMatrix({
               <tr>
                 <td
                   colSpan={sessions.length + 1}
-                  className="px-3 py-4 text-center text-xs text-navy-400"
+                  className="px-3 py-4 text-center text-xs text-ink-3"
                 >
                   No interns assigned to this project.
                 </td>
               </tr>
             ) : (
               roster.map((intern) => (
-                <tr key={intern.id} className="border-t border-navy-50">
-                  <td className="sticky left-0 z-10 bg-white px-3 py-1.5">
-                    <div className="text-[13px] font-medium text-navy-800">
+                <tr key={intern.id} className="border-t border-line">
+                  <td className="sticky left-0 z-10 bg-surface px-3 py-1.5">
+                    <div className="text-[13px] font-medium text-ink">
                       {intern.name}
                     </div>
-                    <div className="text-[10px] text-navy-400">
+                    <div className="text-[10px] text-ink-3">
                       {ROLE_LABELS[intern.role]}
                       {intern.moodle_user_id == null ? ' · unlinked' : ''}
                     </div>
@@ -337,9 +390,9 @@ function ProjectMatrix({
 }
 
 function cellClasses(status: 'present' | 'absent' | 'na'): string {
-  if (status === 'present') return 'bg-emerald-50 text-emerald-700'
-  if (status === 'absent') return 'bg-red-50 text-red-600'
-  return 'bg-navy-50 text-navy-300'
+  if (status === 'present') return 'bg-st-approved-bg text-st-approved-fg'
+  if (status === 'absent') return 'bg-st-cancelled-bg text-st-cancelled-fg'
+  return 'bg-surface-3 text-ink-3'
 }
 
 function AmendModal({
@@ -373,7 +426,7 @@ function AmendModal({
       maxWidth="max-w-md"
     >
       <div className="space-y-4">
-        <div className="text-sm text-navy-600">
+        <div className="text-sm text-ink-2">
           Current status:{' '}
           <span className="font-semibold">
             {target.current === 'present'
@@ -392,9 +445,9 @@ function AmendModal({
               className={`flex-1 rounded-xl border px-3 py-2 text-sm font-semibold capitalize transition ${
                 next === opt
                   ? opt === 'present'
-                    ? 'border-emerald-400 bg-emerald-50 text-emerald-700'
-                    : 'border-red-300 bg-red-50 text-red-600'
-                  : 'border-navy-200 text-navy-500 hover:bg-navy-50'
+                    ? 'border-st-approved bg-st-approved-bg text-st-approved-fg'
+                    : 'border-st-cancelled bg-st-cancelled-bg text-st-cancelled-fg'
+                  : 'border-line-2 text-ink-3 hover:bg-surface-2'
               }`}
             >
               Mark {opt}
@@ -403,7 +456,7 @@ function AmendModal({
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-navy-400">
+          <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-3">
             Reason (optional)
           </label>
           <textarea
@@ -411,21 +464,21 @@ function AmendModal({
             onChange={(e) => setReason(e.target.value)}
             rows={3}
             placeholder="e.g. joined by phone; system was down…"
-            className="w-full resize-none rounded-lg border border-navy-200 bg-white px-3 py-2 text-sm text-navy-900 outline-none focus:border-sunburst-500"
+            className="w-full resize-none rounded-lg border border-line-2 bg-surface px-3 py-2 text-sm text-ink outline-none focus:border-sunburst-500"
           />
         </div>
 
         <div className="flex justify-end gap-2 pt-1">
           <button
             onClick={onClose}
-            className="rounded-xl px-4 py-2 text-sm font-medium text-navy-500 transition hover:bg-navy-50"
+            className="rounded-xl px-4 py-2 text-sm font-medium text-ink-3 transition hover:bg-surface-2"
           >
             Cancel
           </button>
           <button
             onClick={() => void save()}
             disabled={saving}
-            className="rounded-xl bg-navy-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-navy-800 disabled:opacity-50"
+            className="rounded-xl bg-rail px-4 py-2 text-sm font-semibold text-rail-ink transition hover:opacity-90 disabled:opacity-50"
           >
             {saving ? 'Saving…' : 'Save correction'}
           </button>
@@ -445,11 +498,11 @@ function Centered({
   spin?: boolean
 }) {
   return (
-    <div className="flex h-full items-center justify-center p-8 text-navy-400">
+    <div className="flex h-full items-center justify-center p-8 text-ink-3">
       {spin ? (
-        <span className="h-6 w-6 animate-spin rounded-full border-2 border-navy-200 border-t-sunburst-500" />
+        <span className="h-6 w-6 animate-spin rounded-full border-2 border-line-2 border-t-sunburst-500" />
       ) : (
-        <div className="max-w-md rounded-2xl border border-sunburst-200 bg-sunburst-50/50 p-6 text-center text-sm text-navy-600">
+        <div className="max-w-md rounded-2xl border border-st-pending bg-st-pending-bg p-6 text-center text-sm text-ink-2">
           {children}
         </div>
       )}

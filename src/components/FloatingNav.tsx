@@ -4,9 +4,26 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useAuth } from '../hooks/useAuth'
 import { useInterns } from '../hooks/useInterns'
 import { useTheme } from '../hooks/useTheme'
+import {
+  BurgerIcon,
+  CalendarIcon,
+  ChevronIcon,
+  HomeIcon,
+  LogOutIcon,
+  ManageIcon,
+  MoonIcon,
+  ShieldIcon,
+  SunIcon,
+  UsersIcon,
+} from './icons'
 
-// Served from public/ — reference by root URL, not a bundler import.
-const monogram = '/Icon-40.png'
+// Brand assets served from public/ — reference by root URL. Two wordmark
+// variants (navy for light glass, white for dark glass) and two monograms,
+// so the mark stays legible in either theme and crossfades on collapse.
+const BRAND = {
+  wordmark: { light: '/logo-light.png', dark: '/logo-dark.png' },
+  monogram: { light: '/m-dark.png', dark: '/Icon-40.png' },
+}
 
 /* ============================================================================
    Floating glass pill navigation.
@@ -136,9 +153,13 @@ export function FloatingNav({ onOpenInterns }: { onOpenInterns: () => void }) {
 
   const glass = glassStyle(theme, scrolled)
   const glowRGB = theme === 'dark' ? '201,111,162' : '94,7,67'
+  // Collapse to the monogram when the pill shrinks or on mobile.
+  const collapsed = scrolled || isMobile
+  const wordmarkSrc = theme === 'dark' ? BRAND.wordmark.dark : BRAND.wordmark.light
+  const monogramSrc = theme === 'dark' ? BRAND.monogram.dark : BRAND.monogram.light
 
   return (
-    <div className="relative z-40 flex shrink-0 justify-center px-4 sm:px-5">
+    <div className="fi-no-print relative z-40 flex shrink-0 justify-center px-4 sm:px-5">
       <div
         className="relative w-full"
         style={{
@@ -160,39 +181,41 @@ export function FloatingNav({ onOpenInterns }: { onOpenInterns: () => void }) {
             ...glass,
           }}
         >
-          {/* Brand — navy tile + collapsing wordmark */}
+          {/* Brand — theme-aware logo, crossfades wordmark <-> monogram */}
           <Link
             to="/"
-            className="flex shrink-0 items-center gap-2.5"
-            aria-label="Home"
+            className="flex shrink-0 items-center"
+            aria-label="Melsoft Academy — Home"
           >
             <span
-              className="grid place-items-center overflow-hidden"
+              className="relative block overflow-hidden"
               style={{
-                width: 34,
-                height: 34,
-                borderRadius: 10,
-                background: 'var(--rail)',
-                boxShadow: '0 2px 8px rgba(10,23,51,0.28)',
+                height: 42,
+                width: collapsed ? 44 : 104,
+                transition: `width 0.35s ${EASE}`,
               }}
             >
               <img
-                src={monogram}
+                src={wordmarkSrc}
+                alt="Melsoft Academy"
+                className="absolute left-0 top-1/2 -translate-y-1/2 object-contain object-left"
+                style={{
+                  height: 36,
+                  opacity: collapsed ? 0 : 1,
+                  transition: 'opacity 0.3s ease',
+                }}
+              />
+              <img
+                src={monogramSrc}
                 alt=""
                 aria-hidden="true"
-                className="h-5 w-5 object-contain"
+                className="absolute left-0 top-1/2 -translate-y-1/2 object-contain object-left"
+                style={{
+                  height: 34,
+                  opacity: collapsed ? 1 : 0,
+                  transition: 'opacity 0.3s ease',
+                }}
               />
-            </span>
-            <span
-              className="overflow-hidden whitespace-nowrap text-[15px] font-extrabold tracking-tight"
-              style={{
-                color: 'var(--text-1)',
-                maxWidth: scrolled || isMobile ? 0 : 140,
-                opacity: scrolled || isMobile ? 0 : 1,
-                transition: `max-width 0.35s ${EASE}, opacity 0.25s ease`,
-              }}
-            >
-              FI&nbsp;Tracker
             </span>
           </Link>
 
@@ -614,127 +637,4 @@ function panelStyle(theme: 'light' | 'dark') {
         ? '0 30px 60px -20px rgba(0,0,0,0.7)'
         : '0 30px 60px -20px rgba(30,40,95,0.18)',
   } as const
-}
-
-/* -------------------------------------------------------------------------- */
-/* Icons (stroke = currentColor)                                              */
-/* -------------------------------------------------------------------------- */
-
-const iconProps = {
-  width: 16,
-  height: 16,
-  viewBox: '0 0 24 24',
-  fill: 'none',
-  stroke: 'currentColor',
-  strokeWidth: 2,
-  strokeLinecap: 'round' as const,
-  strokeLinejoin: 'round' as const,
-}
-
-function HomeIcon() {
-  return (
-    <svg {...iconProps}>
-      <path d="M3 10.5 12 3l9 7.5" />
-      <path d="M5 9.5V21h14V9.5" />
-    </svg>
-  )
-}
-function UsersIcon() {
-  return (
-    <svg {...iconProps}>
-      <circle cx="9" cy="8" r="3" />
-      <path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6" />
-      <path d="M16 5.5a3 3 0 0 1 0 5.5M21 20c0-2.5-1.4-4.7-3.5-5.6" />
-    </svg>
-  )
-}
-function CalendarIcon() {
-  return (
-    <svg {...iconProps}>
-      <rect x="3" y="5" width="18" height="16" rx="2.5" />
-      <path d="M3 9h18M8 3v4M16 3v4" />
-    </svg>
-  )
-}
-function ShieldIcon() {
-  return (
-    <svg {...iconProps}>
-      <path d="M12 3l7 3v5c0 4.5-3 7.8-7 9-4-1.2-7-4.5-7-9V6l7-3Z" />
-    </svg>
-  )
-}
-function SunIcon() {
-  return (
-    <svg {...iconProps} width={18} height={18}>
-      <circle cx="12" cy="12" r="4" />
-      <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
-    </svg>
-  )
-}
-function MoonIcon() {
-  return (
-    <svg {...iconProps} width={18} height={18}>
-      <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" />
-    </svg>
-  )
-}
-function ChevronIcon({ open }: { open: boolean }) {
-  return (
-    <svg
-      {...iconProps}
-      width={14}
-      height={14}
-      style={{
-        color: 'var(--text-3)',
-        transform: open ? 'rotate(180deg)' : 'none',
-        transition: 'transform 0.2s ease',
-      }}
-    >
-      <path d="m6 9 6 6 6-6" />
-    </svg>
-  )
-}
-function ManageIcon() {
-  return (
-    <svg {...iconProps}>
-      <circle cx="9" cy="8" r="3" />
-      <path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6" />
-      <circle cx="18" cy="6" r="2" />
-      <path d="M18 8v3M16.3 7l-1.7 1M19.7 7l1.7 1" />
-    </svg>
-  )
-}
-function LogOutIcon() {
-  return (
-    <svg {...iconProps}>
-      <path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3" />
-      <path d="M10 17l-5-5 5-5M5 12h11" />
-    </svg>
-  )
-}
-function BurgerIcon({ open }: { open: boolean }) {
-  return (
-    <svg
-      width={20}
-      height={20}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2.2}
-      strokeLinecap="round"
-    >
-      {open ? (
-        <>
-          <path d="M6 6l12 12" />
-          <path d="M18 6 6 18" />
-        </>
-      ) : (
-        <>
-          <path d="M4 7h16" />
-          <path d="M4 12h16" />
-          <path d="M4 17h16" />
-        </>
-      )}
-    </svg>
-  )
 }

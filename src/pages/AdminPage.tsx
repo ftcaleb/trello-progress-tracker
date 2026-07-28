@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth'
 import { ROLE_LABELS, ROLE_ORDER } from '../types'
 import type { Profile, Project, Role } from '../types'
 import { Avatar, AvatarStack } from '../components/Avatar'
+import { ShieldIcon } from '../components/icons'
 
 type Tab = 'people' | 'teams'
 
@@ -16,24 +17,24 @@ export function AdminPage() {
     <div className="h-full overflow-y-auto fi-scroll">
       <div className="mx-auto max-w-6xl px-5 py-8 sm:px-8">
         <div className="mb-6">
-          <h1 className="flex items-center gap-2 text-2xl font-extrabold text-navy-900">
-            <span aria-hidden="true">🛡️</span> Admin Console
+          <h1 className="flex items-center gap-2 font-display text-2xl font-bold text-ink">
+            <ShieldIcon size={22} className="text-accent" /> Admin Console
           </h1>
-          <p className="mt-1 text-sm text-navy-400">
+          <p className="mt-1 text-sm text-ink-3">
             Manage who has access, connect people to the roster, and assign them
             to projects.
           </p>
         </div>
 
-        <div className="mb-5 inline-flex rounded-xl border border-navy-100 bg-white p-1 shadow-card">
+        <div className="mb-5 inline-flex rounded-xl border border-line bg-surface p-1 shadow-e1">
           {(['people', 'teams'] as Tab[]).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
               className={`rounded-lg px-4 py-1.5 text-sm font-semibold capitalize transition ${
                 tab === t
-                  ? 'bg-navy-900 text-white'
-                  : 'text-navy-500 hover:bg-navy-50'
+                  ? 'bg-rail text-rail-ink'
+                  : 'text-ink-3 hover:bg-surface-2'
               }`}
             >
               {t}
@@ -42,11 +43,11 @@ export function AdminPage() {
         </div>
 
         {admin.loading ? (
-          <div className="flex h-40 items-center justify-center text-navy-400">
-            <span className="h-6 w-6 animate-spin rounded-full border-2 border-navy-200 border-t-sunburst-500" />
+          <div className="flex h-40 items-center justify-center text-ink-3">
+            <span className="h-6 w-6 animate-spin rounded-full border-2 border-line-2 border-t-sunburst-500" />
           </div>
         ) : admin.loadError ? (
-          <div className="rounded-xl border border-sunburst-200 bg-sunburst-50/50 p-6 text-center text-sm text-navy-600">
+          <div className="rounded-xl border border-st-pending bg-st-pending-bg p-6 text-center text-sm text-ink-2">
             {admin.loadError}
             <button
               onClick={() => admin.reload()}
@@ -76,8 +77,8 @@ function PeopleTab({
 }) {
   const { profiles } = admin
   return (
-    <div className="overflow-hidden rounded-xl border border-navy-100 bg-white shadow-card">
-      <div className="hidden grid-cols-12 gap-2 border-b border-navy-100 bg-navy-50/60 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-navy-400 md:grid">
+    <div className="overflow-hidden rounded-xl border border-line bg-surface shadow-e1">
+      <div className="hidden grid-cols-12 gap-2 border-b border-line bg-surface-2 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-ink-3 md:grid">
         <div className="col-span-4">Person</div>
         <div className="col-span-2">Role</div>
         <div className="col-span-2">Access</div>
@@ -85,7 +86,7 @@ function PeopleTab({
         <div className="col-span-3">Roster link</div>
       </div>
       {profiles.length === 0 ? (
-        <p className="px-4 py-8 text-center text-sm text-navy-400">
+        <p className="px-4 py-8 text-center text-sm text-ink-3">
           No one has signed in yet.
         </p>
       ) : (
@@ -118,18 +119,18 @@ function PersonRow({
   const displayName = profile.full_name?.trim() || profile.moodle_username || '—'
 
   return (
-    <div className="border-b border-navy-50 p-4 last:border-0 md:grid md:grid-cols-12 md:items-center md:gap-2 md:px-4 md:py-3">
+    <div className="border-b border-line p-4 last:border-0 md:grid md:grid-cols-12 md:items-center md:gap-2 md:px-4 md:py-3">
       {/* Person */}
       <div className="min-w-0 md:col-span-4">
-        <div className="truncate text-sm font-semibold text-navy-900">
+        <div className="truncate text-sm font-semibold text-ink">
           {displayName}
           {isSelf ? (
-            <span className="ml-1.5 rounded bg-navy-100 px-1.5 py-0.5 text-[10px] font-medium text-navy-500">
+            <span className="ml-1.5 rounded bg-surface-3 px-1.5 py-0.5 text-[10px] font-medium text-ink-3">
               you
             </span>
           ) : null}
         </div>
-        <div className="truncate text-xs text-navy-400">
+        <div className="truncate text-xs text-ink-3">
           {profile.moodle_username
             ? `@${profile.moodle_username}`
             : 'email account'}
@@ -138,14 +139,14 @@ function PersonRow({
 
       {/* Role */}
       <div className="mt-3 flex items-center md:col-span-2 md:mt-0">
-        <span className="w-24 shrink-0 text-[11px] font-semibold uppercase tracking-wide text-navy-400 md:hidden">
+        <span className="w-24 shrink-0 text-[11px] font-semibold uppercase tracking-wide text-ink-3 md:hidden">
           Role
         </span>
         <span
           className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
             isAdmin
-              ? 'bg-maroon-600 text-white'
-              : 'bg-navy-100 text-navy-600'
+              ? 'bg-accent text-accent-ink'
+              : 'bg-surface-3 text-ink-2'
           }`}
         >
           {isAdmin ? 'Admin' : 'Member'}
@@ -156,7 +157,7 @@ function PersonRow({
             admin.setRole(profile.id, isAdmin ? 'member' : 'admin')
           }
           title={isSelf ? "You can't change your own role" : ''}
-          className="ml-2 text-[11px] font-medium text-navy-400 underline-offset-2 transition hover:text-maroon-600 hover:underline disabled:cursor-not-allowed disabled:no-underline disabled:opacity-40"
+          className="ml-2 text-[11px] font-medium text-ink-3 underline-offset-2 transition hover:text-accent hover:underline disabled:cursor-not-allowed disabled:no-underline disabled:opacity-40"
         >
           {isAdmin ? 'demote' : 'make admin'}
         </button>
@@ -164,7 +165,7 @@ function PersonRow({
 
       {/* Access */}
       <div className="mt-2 flex items-center md:col-span-2 md:mt-0">
-        <span className="w-24 shrink-0 text-[11px] font-semibold uppercase tracking-wide text-navy-400 md:hidden">
+        <span className="w-24 shrink-0 text-[11px] font-semibold uppercase tracking-wide text-ink-3 md:hidden">
           Access
         </span>
         <button
@@ -173,13 +174,13 @@ function PersonRow({
           title={isSelf ? "You can't disable yourself" : ''}
           className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${
             profile.is_active
-              ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-              : 'bg-navy-100 text-navy-500 hover:bg-navy-200'
+              ? 'bg-st-approved-bg text-st-approved-fg hover:bg-st-approved-bg'
+              : 'bg-surface-3 text-ink-3 hover:bg-surface-3'
           }`}
         >
           <span
             className={`h-1.5 w-1.5 rounded-full ${
-              profile.is_active ? 'bg-emerald-500' : 'bg-navy-400'
+              profile.is_active ? 'bg-st-approved' : 'bg-ink-3'
             }`}
           />
           {profile.is_active ? 'Active' : 'Disabled'}
@@ -187,8 +188,8 @@ function PersonRow({
       </div>
 
       {/* Last login */}
-      <div className="mt-2 flex items-center text-xs text-navy-400 md:col-span-1 md:mt-0">
-        <span className="w-24 shrink-0 text-[11px] font-semibold uppercase tracking-wide text-navy-400 md:hidden">
+      <div className="mt-2 flex items-center text-xs text-ink-3 md:col-span-1 md:mt-0">
+        <span className="w-24 shrink-0 text-[11px] font-semibold uppercase tracking-wide text-ink-3 md:hidden">
           Last login
         </span>
         {relativeTime(profile.last_login_at)}
@@ -199,12 +200,12 @@ function PersonRow({
         {linked ? (
           <div className="flex items-center gap-2">
             <Avatar intern={linked} />
-            <span className="min-w-0 flex-1 truncate text-xs text-navy-600">
+            <span className="min-w-0 flex-1 truncate text-xs text-ink-2">
               {linked.name}
             </span>
             <button
               onClick={() => admin.unlinkProfile(profile)}
-              className="text-[11px] font-medium text-navy-400 transition hover:text-sunburst-600"
+              className="text-[11px] font-medium text-ink-3 transition hover:text-sunburst-600"
             >
               unlink
             </button>
@@ -240,7 +241,7 @@ function LinkControl({
   }, [admin.interns, profile.full_name])
 
   if (profile.moodle_user_id == null) {
-    return <span className="text-[11px] text-navy-300">— (no Moodle id)</span>
+    return <span className="text-[11px] text-ink-3">— (no Moodle id)</span>
   }
 
   if (creating) {
@@ -249,7 +250,7 @@ function LinkControl({
         <select
           value={role}
           onChange={(e) => setRole(e.target.value as Role)}
-          className="rounded-lg border border-navy-200 bg-white px-2 py-1 text-xs text-navy-700 outline-none focus:border-sunburst-500"
+          className="rounded-lg border border-line-2 bg-surface px-2 py-1 text-xs text-ink-2 outline-none focus:border-sunburst-500"
         >
           {ROLE_ORDER.map((r) => (
             <option key={r} value={r}>
@@ -262,13 +263,13 @@ function LinkControl({
             void admin.createInternForProfile(profile, role)
             setCreating(false)
           }}
-          className="rounded-lg bg-maroon-600 px-2 py-1 text-[11px] font-semibold text-white transition hover:bg-maroon-700"
+          className="rounded-lg bg-accent px-2 py-1 text-[11px] font-semibold text-accent-ink transition hover:bg-accent-hover"
         >
           Create
         </button>
         <button
           onClick={() => setCreating(false)}
-          className="text-[11px] text-navy-400 hover:text-navy-700"
+          className="text-[11px] text-ink-3 hover:text-ink-2"
         >
           cancel
         </button>
@@ -283,7 +284,7 @@ function LinkControl({
         onChange={(e) => {
           if (e.target.value) void admin.linkProfileToIntern(profile, e.target.value)
         }}
-        className="min-w-0 flex-1 rounded-lg border border-navy-200 bg-white px-2 py-1 text-xs text-navy-700 outline-none focus:border-sunburst-500"
+        className="min-w-0 flex-1 rounded-lg border border-line-2 bg-surface px-2 py-1 text-xs text-ink-2 outline-none focus:border-sunburst-500"
       >
         <option value="" disabled>
           Link to roster…
@@ -296,7 +297,7 @@ function LinkControl({
       </select>
       <button
         onClick={() => setCreating(true)}
-        className="whitespace-nowrap text-[11px] font-medium text-navy-400 transition hover:text-maroon-600"
+        className="whitespace-nowrap text-[11px] font-medium text-ink-3 transition hover:text-accent"
       >
         + new
       </button>
@@ -328,13 +329,13 @@ function ProjectTeam({
   const assignedIds = new Set(assigned.map((i) => i.id))
 
   return (
-    <div className="rounded-xl border border-navy-100 bg-white shadow-card">
+    <div className="rounded-xl border border-line bg-surface shadow-e1">
       <div className="flex items-center justify-between gap-3 px-4 py-3">
         <div className="min-w-0">
-          <div className="truncate text-sm font-bold text-navy-900">
+          <div className="truncate text-sm font-bold text-ink">
             {project.name}
           </div>
-          <div className="text-xs text-navy-400">
+          <div className="text-xs text-ink-3">
             {assigned.length} assigned
           </div>
         </div>
@@ -342,7 +343,7 @@ function ProjectTeam({
           {assigned.length > 0 ? <AvatarStack interns={assigned} max={6} /> : null}
           <button
             onClick={() => setOpen((v) => !v)}
-            className="rounded-lg border border-navy-200 px-3 py-1.5 text-xs font-semibold text-navy-600 transition hover:border-sunburst-400 hover:text-sunburst-600"
+            className="rounded-lg border border-line-2 px-3 py-1.5 text-xs font-semibold text-ink-2 transition hover:border-sunburst-400 hover:text-sunburst-600"
           >
             {open ? 'Done' : 'Manage team'}
           </button>
@@ -350,9 +351,9 @@ function ProjectTeam({
       </div>
 
       {open ? (
-        <div className="max-h-72 space-y-1 overflow-y-auto fi-scroll border-t border-navy-100 p-3">
+        <div className="max-h-72 space-y-1 overflow-y-auto fi-scroll border-t border-line p-3">
           {admin.interns.length === 0 ? (
-            <p className="py-4 text-center text-xs text-navy-400">
+            <p className="py-4 text-center text-xs text-ink-3">
               No roster records yet.
             </p>
           ) : (
@@ -361,7 +362,7 @@ function ProjectTeam({
               return (
                 <label
                   key={intern.id}
-                  className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5 transition hover:bg-navy-50"
+                  className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5 transition hover:bg-surface-2"
                 >
                   <input
                     type="checkbox"
@@ -373,13 +374,13 @@ function ProjectTeam({
                         e.target.checked,
                       )
                     }
-                    className="h-4 w-4 rounded border-navy-300 text-sunburst-500 focus:ring-sunburst-500/30"
+                    className="h-4 w-4 rounded border-line-2 text-sunburst-500 focus:ring-sunburst-500/30"
                   />
                   <Avatar intern={intern} />
-                  <span className="min-w-0 flex-1 truncate text-sm text-navy-700">
+                  <span className="min-w-0 flex-1 truncate text-sm text-ink-2">
                     {intern.name}
                   </span>
-                  <span className="text-[11px] text-navy-400">
+                  <span className="text-[11px] text-ink-3">
                     {ROLE_LABELS[intern.role]}
                     {intern.moodle_user_id != null ? ' · linked' : ''}
                   </span>

@@ -138,14 +138,14 @@ export function CommentsPopover({
         width: pos.width,
         maxHeight: pos.maxHeight,
       }}
-      className="z-[60] flex animate-fade-in flex-col overflow-hidden rounded-xl border border-navy-100 bg-white shadow-modal"
+      className="z-[60] flex animate-fade-in flex-col overflow-hidden rounded-xl border border-line bg-surface shadow-e4"
       onClick={(e) => e.stopPropagation()}
     >
-      <div className="flex shrink-0 items-center justify-between border-b border-navy-100 px-3.5 py-2.5">
-        <span className="text-sm font-bold text-navy-900">Comments</span>
+      <div className="flex shrink-0 items-center justify-between border-b border-line px-3.5 py-2.5">
+        <span className="text-sm font-bold text-ink">Comments</span>
         <button
           onClick={onClose}
-          className="rounded p-1 text-navy-400 transition hover:bg-navy-50 hover:text-navy-700"
+          className="rounded p-1 text-ink-3 transition hover:bg-surface-2 hover:text-ink-2"
           aria-label="Close comments"
         >
           ✕
@@ -154,15 +154,15 @@ export function CommentsPopover({
 
       <div className="min-h-0 flex-1 overflow-y-auto fi-scroll px-3.5 py-3">
         {comments.length === 0 ? (
-          <p className="py-6 text-center text-sm text-navy-400">
+          <p className="py-6 text-center text-sm text-ink-3">
             No comments yet. Start the thread below.
           </p>
         ) : (
           <div className="space-y-4">
             {groups.map((group, gi) => (
               <div key={group.phase?.id ?? `unphased-${gi}`}>
-                <div className="sticky top-0 z-10 -mx-3.5 mb-2 bg-white/95 px-3.5 py-1 backdrop-blur">
-                  <span className="inline-block rounded-full bg-navy-50 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-navy-500">
+                <div className="sticky top-0 z-10 -mx-3.5 mb-2 bg-surface px-3.5 py-1 backdrop-blur">
+                  <span className="inline-block rounded-full bg-surface-3 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-ink-3">
                     {group.phase
                       ? `${group.phase.name} · Week ${group.phase.week_number}`
                       : 'Unphased'}
@@ -186,7 +186,7 @@ export function CommentsPopover({
         )}
       </div>
 
-      <div className="shrink-0 border-t border-navy-100 p-3">
+      <div className="shrink-0 border-t border-line p-3">
         <textarea
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
@@ -195,10 +195,10 @@ export function CommentsPopover({
           }}
           rows={2}
           placeholder="Write a comment…"
-          className="w-full resize-none rounded-lg border border-navy-200 bg-white px-3 py-2 text-sm text-navy-900 outline-none transition placeholder:text-navy-300 focus:border-sunburst-500 focus:ring-4 focus:ring-sunburst-500/15"
+          className="w-full resize-none rounded-lg border border-line-2 bg-surface px-3 py-2 text-sm text-ink outline-none transition placeholder:text-ink-3 focus:border-sunburst-500 focus:ring-4 focus:ring-sunburst-500/15"
         />
         <div className="mt-2 flex items-center justify-between">
-          <span className="text-[11px] text-navy-300">⌘/Ctrl + Enter</span>
+          <span className="text-[11px] text-ink-3">⌘/Ctrl + Enter</span>
           <button
             onClick={submit}
             disabled={!draft.trim()}
@@ -240,13 +240,13 @@ function CommentItem({
 
   if (editing) {
     return (
-      <li className="rounded-lg border border-sunburst-200 bg-sunburst-50/40 p-2.5">
+      <li className="rounded-lg border border-accent-ring bg-accent-wash p-2.5">
         <textarea
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           rows={3}
           autoFocus
-          className="w-full resize-none rounded-md border border-navy-200 bg-white px-2.5 py-1.5 text-sm text-navy-900 outline-none focus:border-sunburst-500"
+          className="w-full resize-none rounded-md border border-line-2 bg-surface px-2.5 py-1.5 text-sm text-ink outline-none focus:border-sunburst-500"
         />
         <div className="mt-2 flex justify-end gap-2">
           <button
@@ -254,7 +254,7 @@ function CommentItem({
               setDraft(comment.content)
               setEditing(false)
             }}
-            className="rounded-md px-2.5 py-1 text-xs font-medium text-navy-500 transition hover:bg-white"
+            className="rounded-md px-2.5 py-1 text-xs font-medium text-ink-3 transition hover:bg-surface"
           >
             Cancel
           </button>
@@ -265,7 +265,7 @@ function CommentItem({
                 setEditing(false)
               }
             }}
-            className="rounded-md bg-maroon-600 px-2.5 py-1 text-xs font-semibold text-white transition hover:bg-maroon-700"
+            className="rounded-md bg-accent px-2.5 py-1 text-xs font-semibold text-accent-ink transition hover:bg-accent-hover"
           >
             Save
           </button>
@@ -275,15 +275,15 @@ function CommentItem({
   }
 
   return (
-    <li className="group rounded-lg border border-navy-100 bg-navy-50/40 p-2.5">
-      <div className="mb-1 flex items-center justify-between text-[11px] font-bold text-navy-500">
+    <li className="group rounded-lg border border-line bg-surface-3 p-2.5">
+      <div className="mb-1 flex items-center justify-between text-[11px] font-bold text-ink-3">
         <span>{authorName}</span>
       </div>
-      <p className="whitespace-pre-wrap text-sm text-navy-800">
+      <p className="whitespace-pre-wrap text-sm text-ink">
         {comment.content}
       </p>
       <div className="mt-1.5 flex items-center justify-between">
-        <span className="text-[11px] text-navy-400">
+        <span className="text-[11px] text-ink-3">
           {formatTimestamp(comment.created_at)}
           {edited ? <span className="ml-1 italic">(edited)</span> : null}
         </span>
@@ -294,7 +294,7 @@ function CommentItem({
                 setDraft(comment.content)
                 setEditing(true)
               }}
-              className="rounded px-1.5 py-0.5 text-[11px] font-medium text-navy-500 transition hover:bg-white hover:text-navy-800"
+              className="rounded px-1.5 py-0.5 text-[11px] font-medium text-ink-3 transition hover:bg-surface hover:text-ink"
             >
               Edit
             </button>
@@ -302,7 +302,7 @@ function CommentItem({
               onClick={() => {
                 if (window.confirm('Delete this comment?')) onDelete(comment.id)
               }}
-              className="rounded px-1.5 py-0.5 text-[11px] font-medium text-navy-400 transition hover:bg-white hover:text-sunburst-600"
+              className="rounded px-1.5 py-0.5 text-[11px] font-medium text-ink-3 transition hover:bg-surface hover:text-sunburst-600"
             >
               Delete
             </button>

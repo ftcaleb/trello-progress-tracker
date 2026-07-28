@@ -76,6 +76,11 @@
   --st-cancelled: #d03b3b; --st-cancelled-bg: #fde8e8; --st-cancelled-fg: #b42318;
   --st-paid: #720075;      --st-paid-bg: #f4e4f5;      --st-paid-fg: #6b0a6e;
 
+  /* Role identity — developer=maroon, designer=navy, cybersecurity=orange */
+  --role-developer: #5e0743;  --role-developer-bg: #fbf0f7; --role-developer-fg: #98266c; --role-developer-ring: rgba(94,7,67,0.7);
+  --role-designer: #374d7d;   --role-designer-bg: #eef1f7;  --role-designer-fg: #374d7d;  --role-designer-ring: rgba(55,77,125,0.7);
+  --role-cyber: #ff7300;      --role-cyber-bg: #fff5e9;     --role-cyber-fg: #bf4c00;     --role-cyber-ring: rgba(255,115,0,0.85);
+
   /* Fonts */
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
@@ -139,6 +144,11 @@
   --st-approved: #3fcf8e;  --st-approved-bg: #0d2f22;  --st-approved-fg: #6fe0ab;
   --st-cancelled: #f97066; --st-cancelled-bg: #3a1512; --st-cancelled-fg: #fda29b;
   --st-paid: #d99ada;      --st-paid-bg: #2c1030;      --st-paid-fg: #e5b8e6;
+
+  /* Role identity (dark) — lift bg to a deep tint, fg to a light readable hue */
+  --role-developer-bg: #2c1030; --role-developer-fg: #e5b8e6; --role-developer-ring: rgba(201,111,162,0.7);
+  --role-designer-bg: #1c2a4d;  --role-designer-fg: #b9c4dc;  --role-designer-ring: rgba(148,163,196,0.7);
+  --role-cyber-bg: #33270c;     --role-cyber-fg: #f7cd77;     --role-cyber-ring: rgba(244,183,64,0.8);
 }
 
 @layer base {
@@ -249,19 +259,55 @@
   }
 }
 
-/* Print — history/registers are meant to print: flatten cards, avoid breaks */
+/* Print — registers/reports are meant to print. Force the light palette so
+   dark-mode users still get a readable page, let the app's fixed-height
+   internally-scrolled containers flow onto paper, and drop chrome. */
 @media print {
-  :root {
+  :root,
+  :root[data-theme="dark"] {
     --plane: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #f7f8fb;
+    --surface-3: #eef1f7;
+    --text-1: #0a1733;
+    --text-2: #5b6478;
+    --text-3: #8a93a8;
+    --line: #e5e8f0;
+    --line-2: #ccd2df;
+    --st-approved-bg: #dcfce7;  --st-approved-fg: #15803d;
+    --st-cancelled-bg: #fde8e8; --st-cancelled-fg: #b42318;
+    --st-pending-bg: #fff3dc;   --st-pending-fg: #a16207;
+    --viz-series: #5e0743;
+    --accent: #5e0743;          --accent-ink: #ffffff;
   }
+
   body {
     background: #ffffff;
   }
+
+  /* Neutralize the viewport-locked layout so all content paginates */
+  #root,
+  #root > * {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+  main {
+    height: auto !important;
+    overflow: visible !important;
+  }
+  .fi-scroll {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
   .card {
     box-shadow: none !important;
     border-color: #d7dbe5 !important;
     break-inside: avoid;
   }
+
   .fi-no-print {
     display: none !important;
   }

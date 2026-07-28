@@ -67,60 +67,96 @@ export function AuthPage() {
     }
   }
 
+  const inputClass =
+    'w-full rounded-xl border border-white/10 bg-[#0c1630] px-4 py-3 text-sm text-[#f2f5fc] outline-none transition placeholder:text-[#5f6b86] focus:border-[#c96fa2] focus:ring-4 focus:ring-[#c96fa2]/20'
+  const labelClass =
+    'mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-[#8b97b4]'
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-navy-900 p-4">
-      {/* Ambient gradient shapes */}
+    <div
+      className="relative flex min-h-screen items-center justify-center overflow-hidden p-4"
+      style={{
+        background:
+          'radial-gradient(1100px 620px at 50% -12%, #17244c 0%, #0a1733 46%, #060e22 100%)',
+      }}
+    >
+      {/* Pink ambient glows */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-gradient-to-br from-sunburst-500/30 to-maroon-600/20 blur-3xl" />
-        <div className="absolute -bottom-32 -right-16 h-80 w-80 rounded-full bg-gradient-to-tr from-maroon-600/30 to-sunburst-500/10 blur-3xl" />
+        <div className="absolute -left-32 top-16 h-[26rem] w-[26rem] rounded-full bg-[#c96fa2]/10 blur-[130px]" />
+        <div className="absolute -right-28 bottom-0 h-[24rem] w-[24rem] rounded-full bg-[#c96fa2]/[0.07] blur-[130px]" />
+        {/* faint grid */}
+        <div
+          className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage:
+              'linear-gradient(#ffffff 1px, transparent 1px), linear-gradient(90deg, #ffffff 1px, transparent 1px)',
+            backgroundSize: '44px 44px',
+          }}
+        />
       </div>
 
-      <div className="relative grid w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-modal md:grid-cols-2">
-        {/* Brand panel */}
-        <div className="relative hidden flex-col justify-between bg-gradient-to-br from-maroon-600 via-maroon-700 to-navy-900 p-10 text-white md:flex">
-          <span className="text-lg font-extrabold tracking-tight">
-            FI Project Tracker
-          </span>
-          <div>
-            <h2 className="text-2xl font-extrabold leading-snug">
-              Track every startup, phase by phase.
-            </h2>
-            <p className="mt-3 text-sm text-white/70">
-              A shared board for the Founder Institute cohort — deliverables,
-              phase gates, and standups in one place.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-white/50">
-            <span className="h-1.5 w-1.5 rounded-full bg-sunburst-500" />
-            13 projects · 4 weekly phases each
-          </div>
+      <div className="relative w-full max-w-[420px]">
+        {/* Brand wordmark above the card */}
+        <div className="mb-7 flex justify-center">
+          <img
+            src="/logo-dark.png"
+            alt="Melsoft Academy"
+            className="h-8 w-auto object-contain"
+          />
         </div>
 
-        {/* Form panel */}
-        <div className="p-8 sm:p-10">
-          <div className="mb-6 flex items-center gap-3 md:hidden">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sunburst-500 text-base font-black text-navy-900">
-              FI
-            </div>
-            <span className="text-base font-bold text-navy-900">
-              FI Project Tracker
-            </span>
+        {/* Card */}
+        <div
+          className="relative overflow-hidden rounded-3xl border border-white/10 p-8 sm:p-9"
+          style={{
+            background:
+              'linear-gradient(180deg, #101c3d 0%, #0d1834 100%)',
+            boxShadow:
+              '0 40px 90px -30px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.05)',
+          }}
+        >
+          {/* Pink lamp accent — echoes the navbar */}
+          <div className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2">
+            <div className="h-[3px] w-20 rounded-b-full bg-[#c96fa2]" />
+            <div className="absolute left-1/2 top-0 h-7 w-28 -translate-x-1/2 rounded-full bg-[#c96fa2]/30 blur-xl" />
           </div>
 
-          <h1 className="text-2xl font-extrabold text-navy-900">Welcome back</h1>
-          <p className="mt-1 text-sm text-navy-400">
+          {/* Mode toggle — segmented control */}
+          <div className="mb-7 grid grid-cols-2 gap-1 rounded-full border border-white/10 bg-[#0b1428] p-1">
+            {(
+              [
+                ['moodle', 'Moodle'],
+                ['email', 'Administrator'],
+              ] as const
+            ).map(([m, label]) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => switchMode(m)}
+                className={`rounded-full py-2 text-xs font-semibold transition focus:outline-none ${
+                  mode === m
+                    ? 'bg-[#c96fa2] text-[#1a0512] shadow-[0_4px_14px_-4px_rgba(201,111,162,0.6)]'
+                    : 'text-[#8b97b4] hover:text-white'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <h1 className="font-display text-[26px] font-bold leading-tight text-[#f2f5fc]">
+            Welcome back
+          </h1>
+          <p className="mt-1.5 text-sm text-[#8b97b4]">
             {mode === 'moodle'
-              ? 'Sign in with your Moodle account.'
-              : 'Administrator sign-in.'}
+              ? 'Sign in with your Moodle account to continue.'
+              : 'Administrator email sign-in.'}
           </p>
 
           <form onSubmit={onSubmit} className="mt-7 space-y-4" noValidate>
             {mode === 'moodle' ? (
               <div>
-                <label
-                  htmlFor="username"
-                  className="mb-1.5 block text-sm font-medium text-navy-700"
-                >
+                <label htmlFor="username" className={labelClass}>
                   Moodle username
                 </label>
                 <input
@@ -132,15 +168,12 @@ export function AuthPage() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="your Moodle username"
-                  className="w-full rounded-xl border border-navy-200 bg-white px-3.5 py-2.5 text-sm text-navy-900 outline-none transition placeholder:text-navy-300 focus:border-sunburst-500 focus:ring-4 focus:ring-sunburst-500/15"
+                  className={inputClass}
                 />
               </div>
             ) : (
               <div>
-                <label
-                  htmlFor="email"
-                  className="mb-1.5 block text-sm font-medium text-navy-700"
-                >
+                <label htmlFor="email" className={labelClass}>
                   Email
                 </label>
                 <input
@@ -150,16 +183,13 @@ export function AuthPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
-                  className="w-full rounded-xl border border-navy-200 bg-white px-3.5 py-2.5 text-sm text-navy-900 outline-none transition placeholder:text-navy-300 focus:border-sunburst-500 focus:ring-4 focus:ring-sunburst-500/15"
+                  className={inputClass}
                 />
               </div>
             )}
 
             <div>
-              <label
-                htmlFor="password"
-                className="mb-1.5 block text-sm font-medium text-navy-700"
-              >
+              <label htmlFor="password" className={labelClass}>
                 {mode === 'moodle' ? 'Moodle password' : 'Password'}
               </label>
               <input
@@ -169,12 +199,12 @@ export function AuthPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full rounded-xl border border-navy-200 bg-white px-3.5 py-2.5 text-sm text-navy-900 outline-none transition placeholder:text-navy-300 focus:border-sunburst-500 focus:ring-4 focus:ring-sunburst-500/15"
+                className={inputClass}
               />
             </div>
 
             {error ? (
-              <div className="rounded-lg border border-sunburst-200 bg-sunburst-50 px-3.5 py-2.5 text-sm text-sunburst-800">
+              <div className="rounded-xl border border-[#c96fa2]/30 bg-[#c96fa2]/10 px-4 py-3 text-sm text-[#f0c4dd]">
                 {error}
               </div>
             ) : null}
@@ -182,11 +212,11 @@ export function AuthPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-sunburst-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-sunburst-600 focus:ring-4 focus:ring-sunburst-500/25 disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl bg-[#c96fa2] px-4 py-3 text-sm font-bold text-[#1a0512] shadow-[0_10px_28px_-10px_rgba(201,111,162,0.7)] transition hover:bg-[#e19cc4] focus:outline-none focus:ring-4 focus:ring-[#c96fa2]/30 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {submitting ? (
                 <>
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#1a0512]/30 border-t-[#1a0512]" />
                   {mode === 'moodle' ? 'Checking with Moodle…' : 'Logging in…'}
                 </>
               ) : mode === 'moodle' ? (
@@ -196,27 +226,12 @@ export function AuthPage() {
               )}
             </button>
           </form>
-
-          <div className="mt-6 border-t border-navy-100 pt-4 text-center">
-            {mode === 'moodle' ? (
-              <button
-                type="button"
-                onClick={() => switchMode('email')}
-                className="text-xs font-medium text-navy-400 transition hover:text-maroon-600 hover:underline"
-              >
-                Administrator sign-in
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => switchMode('moodle')}
-                className="text-xs font-medium text-navy-400 transition hover:text-maroon-600 hover:underline"
-              >
-                ← Back to Moodle sign-in
-              </button>
-            )}
-          </div>
         </div>
+
+        {/* Footer note */}
+        <p className="mt-6 text-center text-xs text-[#5f6b86]">
+          Founder Institute cohort · Melsoft Academy
+        </p>
       </div>
     </div>
   )

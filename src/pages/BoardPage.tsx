@@ -247,20 +247,20 @@ export function BoardPage() {
   return (
     <div className="flex h-full flex-col">
       {/* Board header */}
-      <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-navy-100 bg-white px-5 py-3">
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-line bg-surface px-5 py-3">
         <div className="flex min-w-0 items-center gap-3">
           <Link
             to="/"
-            className="rounded-lg border border-navy-200 px-2.5 py-1.5 text-sm font-medium text-navy-600 transition hover:bg-navy-50"
+            className="rounded-lg border border-line-2 px-2.5 py-1.5 text-sm font-medium text-ink-2 transition hover:bg-surface-2"
           >
             ← Portfolio
           </Link>
           <div className="min-w-0">
-            <h1 className="truncate text-lg font-bold text-navy-900">
+            <h1 className="truncate text-lg font-bold text-ink">
               {project.name}
             </h1>
             {project.description ? (
-              <p className="truncate text-xs text-navy-400">
+              <p className="truncate text-xs text-ink-3">
                 {project.description}
               </p>
             ) : null}
@@ -271,12 +271,12 @@ export function BoardPage() {
           {assignedInterns.length > 0 ? (
             <AvatarStack interns={assignedInterns} max={5} />
           ) : (
-            <span className="text-xs text-navy-300">No team assigned</span>
+            <span className="text-xs text-ink-3">No team assigned</span>
           )}
           {isAdmin ? (
             <button
               onClick={() => setSettingsOpen(true)}
-              className="rounded-lg border border-navy-200 px-3 py-1.5 text-sm font-medium text-navy-600 transition hover:bg-navy-50"
+              className="rounded-lg border border-line-2 px-3 py-1.5 text-sm font-medium text-ink-2 transition hover:bg-surface-2"
             >
               ⚙ Settings
             </button>
@@ -322,7 +322,7 @@ export function BoardPage() {
             <div className="w-[19rem] shrink-0">
               <button
                 onClick={handleAddPhase}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-navy-200 bg-white/50 px-4 py-3 text-sm font-medium text-navy-500 transition hover:border-sunburst-400 hover:bg-sunburst-50/50 hover:text-sunburst-600"
+                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-line-2 bg-surface px-4 py-3 text-sm font-medium text-ink-3 transition hover:border-sunburst-400 hover:bg-sunburst-50/50 hover:text-sunburst-600"
               >
                 <span className="text-lg leading-none">+</span> Add phase
               </button>
@@ -332,11 +332,11 @@ export function BoardPage() {
 
         <DragOverlay dropAnimation={null}>
           {activeTask ? (
-            <div className="w-[17rem] rotate-2 rounded-xl border border-navy-200 bg-white p-3 shadow-lift">
-              <div className="mb-2 text-sm font-semibold text-navy-900">
+            <div className="w-[17rem] rotate-2 rounded-xl border border-line-2 bg-surface p-3 shadow-e3">
+              <div className="mb-2 text-sm font-semibold text-ink">
                 {activeTask.title}
               </div>
-              <span className="text-xs text-navy-400">
+              <span className="text-xs text-ink-3">
                 {STATUS_LABELS[activeTask.status]}
               </span>
             </div>
@@ -374,7 +374,7 @@ function BoardSkeleton() {
       {Array.from({ length: 4 }).map((_, i) => (
         <div
           key={i}
-          className="flex h-full w-[19rem] shrink-0 flex-col rounded-2xl border border-navy-100 bg-white"
+          className="flex h-full w-[19rem] shrink-0 flex-col rounded-2xl border border-line bg-surface"
         >
           <div className="fi-skeleton h-14 rounded-t-2xl" />
           <div className="space-y-2.5 p-2.5">
@@ -396,16 +396,16 @@ function BoardError({
 }) {
   return (
     <div className="flex h-full items-center justify-center p-6">
-      <div className="max-w-md rounded-2xl border border-sunburst-200 bg-sunburst-50/50 p-8 text-center">
+      <div className="max-w-md rounded-2xl border border-st-pending bg-st-pending-bg p-8 text-center">
         <div className="mb-2 text-2xl">⚠️</div>
-        <h2 className="text-lg font-bold text-navy-900">
+        <h2 className="text-lg font-bold text-ink">
           Could not load this project
         </h2>
-        <p className="mt-1 text-sm text-navy-500">{message}</p>
+        <p className="mt-1 text-sm text-ink-3">{message}</p>
         <div className="mt-4 flex justify-center gap-2">
           <Link
             to="/"
-            className="rounded-xl border border-navy-200 px-4 py-2 text-sm font-medium text-navy-600 transition hover:bg-white"
+            className="rounded-xl border border-line-2 px-4 py-2 text-sm font-medium text-ink-2 transition hover:bg-surface"
           >
             Back to portfolio
           </Link>

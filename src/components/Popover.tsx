@@ -92,7 +92,7 @@ export function Popover({
         width: pos.w,
         maxHeight: pos.mh,
       }}
-      className="z-[70] flex flex-col overflow-hidden rounded-xl border border-navy-100 bg-white shadow-pop animate-fade-in"
+      className="z-[70] flex flex-col overflow-hidden rounded-xl border border-line bg-surface shadow-e2 animate-fade-in"
       onMouseDown={(e) => e.stopPropagation()}
       onClick={(e) => e.stopPropagation()}
     >

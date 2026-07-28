@@ -3,21 +3,21 @@ import type { Role } from '../types'
 // Avatar ring color per role (light theme): developer = maroon, designer = navy,
 // cybersecurity = orange.
 export const roleAvatarClass: Record<Role, string> = {
-  developer: 'bg-maroon-50 text-maroon-700 ring-2 ring-maroon-600/70',
-  designer: 'bg-navy-50 text-navy-700 ring-2 ring-navy-500/70',
-  cybersecurity: 'bg-sunburst-50 text-sunburst-700 ring-2 ring-sunburst-500/80',
+  developer: 'bg-role-developer-bg text-role-developer-fg ring-2 ring-role-developer-ring',
+  designer: 'bg-role-designer-bg text-role-designer-fg ring-2 ring-role-designer-ring',
+  cybersecurity: 'bg-role-cyber-bg text-role-cyber-fg ring-2 ring-role-cyber-ring',
 }
 
 export const roleBadgeClass: Record<Role, string> = {
-  developer: 'bg-maroon-50 text-maroon-700',
-  designer: 'bg-navy-100 text-navy-700',
-  cybersecurity: 'bg-sunburst-50 text-sunburst-700',
+  developer: 'bg-role-developer-bg text-role-developer-fg',
+  designer: 'bg-role-designer-bg text-role-designer-fg',
+  cybersecurity: 'bg-role-cyber-bg text-role-cyber-fg',
 }
 
 export const roleDotClass: Record<Role, string> = {
-  developer: 'bg-maroon-600',
-  designer: 'bg-navy-500',
-  cybersecurity: 'bg-sunburst-500',
+  developer: 'bg-role-developer',
+  designer: 'bg-role-designer',
+  cybersecurity: 'bg-role-cyber',
 }
 
 export function suggestInitials(name: string): string {

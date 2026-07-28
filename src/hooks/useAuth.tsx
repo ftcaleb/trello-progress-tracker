@@ -145,8 +145,8 @@ export function RequireAuth({ children }: { children: ReactNode }) {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-navy-50">
-        <span className="h-6 w-6 animate-spin rounded-full border-2 border-navy-200 border-t-sunburst-500" />
+      <div className="flex h-screen items-center justify-center bg-plane">
+        <span className="h-6 w-6 animate-spin rounded-full border-2 border-line-2 border-t-sunburst-500" />
       </div>
     )
   }
@@ -164,8 +164,8 @@ export function RequireAdmin({ children }: { children: ReactNode }) {
 
   if (loading || profileLoading || (session && !profile)) {
     return (
-      <div className="flex h-full items-center justify-center bg-navy-50">
-        <span className="h-6 w-6 animate-spin rounded-full border-2 border-navy-200 border-t-sunburst-500" />
+      <div className="flex h-full items-center justify-center bg-plane">
+        <span className="h-6 w-6 animate-spin rounded-full border-2 border-line-2 border-t-sunburst-500" />
       </div>
     )
   }

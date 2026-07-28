@@ -7,14 +7,14 @@ import { STATUS_LABELS, STATUS_ORDER } from '../types'
 const triggerClass: Record<TaskStatus, string> = {
   approved:
     'bg-gradient-to-r from-sunburst-500 to-maroon-600 text-white border-transparent',
-  in_progress: 'bg-white text-navy-700 border-navy-200',
-  blocked: 'bg-red-50 text-red-700 border-red-300',
+  in_progress: 'bg-surface text-ink-2 border-line-2',
+  blocked: 'bg-st-cancelled-bg text-st-cancelled-fg border-st-cancelled',
 }
 
 const dotClass: Record<TaskStatus, string> = {
   approved: 'bg-white',
-  in_progress: 'bg-navy-300',
-  blocked: 'bg-red-500',
+  in_progress: 'bg-ink-3',
+  blocked: 'bg-st-cancelled',
 }
 
 const MENU_WIDTH = 160
@@ -128,7 +128,7 @@ export function StatusSelect({
                 left: pos.left,
                 width: MENU_WIDTH,
               }}
-              className="z-[70] animate-fade-in overflow-hidden rounded-xl border border-navy-100 bg-white py-1 shadow-pop"
+              className="z-[70] animate-fade-in overflow-hidden rounded-xl border border-line bg-surface py-1 shadow-e2"
               onPointerDown={(e) => e.stopPropagation()}
               onClick={(e) => e.stopPropagation()}
             >
@@ -139,10 +139,10 @@ export function StatusSelect({
                     onChange(status)
                     setOpen(false)
                   }}
-                  className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition hover:bg-navy-50 ${
+                  className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition hover:bg-surface-2 ${
                     status === value
-                      ? 'font-semibold text-navy-900'
-                      : 'text-navy-600'
+                      ? 'font-semibold text-ink'
+                      : 'text-ink-2'
                   }`}
                 >
                   <span
@@ -150,8 +150,8 @@ export function StatusSelect({
                       status === 'approved'
                         ? 'bg-gradient-to-r from-sunburst-500 to-maroon-600 text-white'
                         : status === 'blocked'
-                          ? 'bg-red-100 text-red-600'
-                          : 'bg-navy-100 text-navy-500'
+                          ? 'bg-st-cancelled-bg text-st-cancelled-fg'
+                          : 'bg-surface-3 text-ink-3'
                     }`}
                   >
                     {status === 'approved' ? '✓' : status === 'blocked' ? '!' : '·'}

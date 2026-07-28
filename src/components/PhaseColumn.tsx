@@ -76,24 +76,24 @@ export function PhaseColumn({
 
   return (
     <div
-      className={`flex h-full w-[19rem] shrink-0 flex-col rounded-2xl border bg-white/70 backdrop-blur-sm transition ${
+      className={`flex h-full w-[19rem] shrink-0 flex-col rounded-2xl border bg-surface backdrop-blur-sm transition ${
         showBlockedDrop
           ? isOver
-            ? 'border-red-400 bg-red-50/30 ring-2 ring-red-400/20 cursor-not-allowed'
-            : 'border-red-100/50 bg-red-50/5 opacity-85 cursor-not-allowed'
+            ? 'border-[color:var(--st-cancelled)] bg-st-cancelled-bg ring-2 ring-[color:var(--st-cancelled)] cursor-not-allowed'
+            : 'border-[color:var(--st-cancelled)] bg-st-cancelled-bg opacity-85 cursor-not-allowed'
           : showValidDrop
             ? 'border-sunburst-400 ring-2 ring-sunburst-400/50'
             : cleared
-              ? 'border-maroon-200'
-              : 'border-navy-100'
+              ? 'border-accent-ring'
+              : 'border-line'
       } ${locked ? 'opacity-50' : ''} ${shaking ? 'animate-shake' : ''}`}
     >
       {/* Header */}
       <div
         className={`rounded-t-2xl border-b px-3.5 py-3 transition ${
           cleared
-            ? 'border-maroon-100 bg-gradient-to-r from-maroon-50 to-sunburst-50'
-            : 'border-navy-100 bg-navy-50/60'
+            ? 'border-accent-ring bg-accent-wash'
+            : 'border-line bg-surface-3'
         }`}
       >
         <div className="flex items-start justify-between gap-2">
@@ -111,7 +111,7 @@ export function PhaseColumn({
                     setEditing(false)
                   }
                 }}
-                className="w-full rounded-md border border-navy-200 bg-white px-2 py-1 text-sm font-bold text-navy-900 outline-none focus:border-sunburst-500"
+                className="w-full rounded-md border border-line-2 bg-surface px-2 py-1 text-sm font-bold text-ink outline-none focus:border-sunburst-500"
               />
             ) : (
               <div className="flex items-center gap-1.5">
@@ -121,20 +121,20 @@ export function PhaseColumn({
                   </span>
                 ) : null}
                 <span
-                  className="truncate text-sm font-bold text-navy-900"
+                  className="truncate text-sm font-bold text-ink"
                   title={phase.name}
                 >
                   {phase.name}
                 </span>
               </div>
             )}
-            <div className="mt-0.5 text-[11px] font-semibold uppercase tracking-wide text-navy-400">
+            <div className="mt-0.5 text-[11px] font-semibold uppercase tracking-wide text-ink-3">
               Week {phase.week_number}
             </div>
           </div>
 
           <div className="flex shrink-0 items-center gap-1.5">
-            <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-navy-100 px-1.5 text-[11px] font-bold text-navy-600">
+            <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-surface-3 px-1.5 text-[11px] font-bold text-ink-2">
               {tasks.length}
             </span>
 
@@ -143,19 +143,19 @@ export function PhaseColumn({
               <div className="relative" ref={menuRef}>
                 <button
                   onClick={() => setMenuOpen((v) => !v)}
-                  className="rounded-md px-1.5 py-0.5 text-navy-400 transition hover:bg-white hover:text-navy-700"
+                  className="rounded-md px-1.5 py-0.5 text-ink-3 transition hover:bg-surface hover:text-ink-2"
                   aria-label="Phase options"
                 >
                   ⋯
                 </button>
                 {menuOpen ? (
-                  <div className="absolute right-0 top-8 z-30 w-40 overflow-hidden rounded-lg border border-navy-100 bg-white py-1 shadow-pop">
+                  <div className="absolute right-0 top-8 z-30 w-40 overflow-hidden rounded-lg border border-line bg-surface py-1 shadow-e2">
                     <button
                       onClick={() => {
                         setMenuOpen(false)
                         onOpenReport()
                       }}
-                      className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-navy-700 transition hover:bg-navy-50"
+                      className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-ink-2 transition hover:bg-surface-2"
                     >
                       <span aria-hidden="true">📄</span>
                       {hasReport ? 'View report' : 'Generate report'}
@@ -168,7 +168,7 @@ export function PhaseColumn({
                             setEditing(true)
                             setMenuOpen(false)
                           }}
-                          className="block w-full px-3 py-2 text-left text-sm text-navy-700 transition hover:bg-navy-50"
+                          className="block w-full px-3 py-2 text-left text-sm text-ink-2 transition hover:bg-surface-2"
                         >
                           Rename phase
                         </button>
@@ -182,7 +182,7 @@ export function PhaseColumn({
                             )
                               board.deletePhase(phase.id)
                           }}
-                          className="block w-full px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
+                          className="block w-full px-3 py-2 text-left text-sm text-st-cancelled-fg transition hover:bg-st-cancelled-bg"
                         >
                           Delete phase
                         </button>
@@ -198,26 +198,26 @@ export function PhaseColumn({
         {/* Cleared state / advance — admin only */}
         {cleared ? (
           <div className="mt-2.5 flex items-center justify-between gap-2">
-            <span className="inline-flex items-center gap-1 rounded-full bg-maroon-600 px-2 py-0.5 text-[11px] font-semibold text-white shadow-sm">
+            <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-[11px] font-semibold text-accent-ink shadow-e1">
               Phase cleared ✓
             </span>
             <div className="flex items-center gap-1.5">
               <button
                 onClick={onOpenReport}
                 title={hasReport ? 'View phase report' : 'Generate phase report'}
-                className="inline-flex items-center gap-1 rounded-lg border border-navy-200 bg-white px-2 py-1 text-xs font-semibold text-navy-700 shadow-sm transition hover:border-sunburst-400 hover:text-sunburst-600"
+                className="inline-flex items-center gap-1 rounded-lg border border-line-2 bg-surface px-2 py-1 text-xs font-semibold text-ink-2 shadow-e1 transition hover:border-sunburst-400 hover:text-sunburst-600"
               >
                 📄 Report
               </button>
               {isAdmin ? (
                 isLast ? (
-                  <span className="text-[11px] font-medium text-navy-400">
+                  <span className="text-[11px] font-medium text-ink-3">
                     Final phase
                   </span>
                 ) : (
                   <button
                     onClick={onAdvance}
-                    className="rounded-lg bg-gradient-to-r from-sunburst-500 to-maroon-600 px-2.5 py-1 text-xs font-semibold text-white shadow-sm transition hover:brightness-110"
+                    className="rounded-lg bg-gradient-to-r from-sunburst-500 to-maroon-600 px-2.5 py-1 text-xs font-semibold text-white shadow-e1 transition hover:brightness-110"
                   >
                     Advance phase →
                   </button>
@@ -254,7 +254,7 @@ export function PhaseColumn({
             className={`flex flex-col items-center justify-center rounded-xl border border-dashed py-6 text-center text-xs transition ${
               showValidDrop
                 ? 'border-sunburst-400 text-sunburst-600'
-                : 'border-navy-200 text-navy-400'
+                : 'border-line-2 text-ink-3'
             }`}
           >
             No tasks yet — add the first
@@ -265,7 +265,7 @@ export function PhaseColumn({
 
         {/* Add task */}
         {adding ? (
-          <div className="rounded-xl border border-sunburst-200 bg-white p-2">
+          <div className="rounded-xl border border-sunburst-200 bg-surface p-2">
             <textarea
               autoFocus
               value={taskDraft}
@@ -282,7 +282,7 @@ export function PhaseColumn({
               }}
               rows={2}
               placeholder="Task title…"
-              className="w-full resize-none rounded-md border border-navy-200 bg-white px-2.5 py-1.5 text-sm text-navy-900 outline-none focus:border-sunburst-500"
+              className="w-full resize-none rounded-md border border-line-2 bg-surface px-2.5 py-1.5 text-sm text-ink outline-none focus:border-sunburst-500"
             />
             <div className="mt-1.5 flex items-center gap-2">
               <button
@@ -296,7 +296,7 @@ export function PhaseColumn({
                   setTaskDraft('')
                   setAdding(false)
                 }}
-                className="rounded-md px-2 py-1 text-xs font-medium text-navy-500 transition hover:bg-navy-50"
+                className="rounded-md px-2 py-1 text-xs font-medium text-ink-3 transition hover:bg-surface-2"
               >
                 Cancel
               </button>
@@ -308,7 +308,7 @@ export function PhaseColumn({
       {!adding ? (
         <button
           onClick={() => setAdding(true)}
-          className="m-2.5 mt-0 rounded-xl border border-dashed border-navy-200 py-2 text-sm font-medium text-navy-500 transition hover:border-sunburst-400 hover:bg-sunburst-50/50 hover:text-sunburst-600"
+          className="m-2.5 mt-0 rounded-xl border border-dashed border-line-2 py-2 text-sm font-medium text-ink-3 transition hover:border-sunburst-400 hover:bg-sunburst-50/50 hover:text-sunburst-600"
         >
           + Add task
         </button>

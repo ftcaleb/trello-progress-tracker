@@ -33,7 +33,7 @@ export function AvatarStack({
 }) {
   const shown = interns.slice(0, max)
   const overflow = interns.length - shown.length
-  const ring = size === 'sm' ? 'ring-2 ring-white' : 'ring-2 ring-white'
+  const ring = size === 'sm' ? 'ring-2 ring-surface' : 'ring-2 ring-surface'
   return (
     <div className="flex -space-x-2">
       {shown.map((i) => (
@@ -43,7 +43,7 @@ export function AvatarStack({
       ))}
       {overflow > 0 ? (
         <span
-          className={`inline-flex items-center justify-center rounded-full bg-navy-100 font-semibold text-navy-600 ${ring} ${
+          className={`inline-flex items-center justify-center rounded-full bg-surface-3 font-semibold text-ink-2 ${ring} ${
             size === 'sm' ? 'h-8 w-8 text-[11px]' : 'h-10 w-10 text-sm'
           }`}
         >

@@ -87,9 +87,9 @@ export function TaskCard({
       style={style}
       {...attributes}
       {...listeners}
-      className={`group rounded-xl border border-navy-100 bg-white p-3 shadow-card transition ${
+      className={`group rounded-xl border border-line bg-surface p-3 shadow-e1 transition ${
         dragDisabled ? '' : 'cursor-grab active:cursor-grabbing'
-      } hover:-translate-y-0.5 hover:border-navy-200 hover:shadow-lift ${
+      } hover:-translate-y-0.5 hover:border-line-2 hover:shadow-e3 ${
         isDragging ? 'opacity-40' : ''
       }`}
     >
@@ -108,9 +108,9 @@ export function TaskCard({
               ;(e.target as HTMLInputElement).blur()
             }
           }}
-          className={`min-w-0 flex-1 rounded-md border border-transparent bg-transparent px-1.5 py-1 text-sm font-semibold text-navy-900 outline-none transition ${
+          className={`min-w-0 flex-1 rounded-md border border-transparent bg-transparent px-1.5 py-1 text-sm font-semibold text-ink outline-none transition ${
             canEditTitle
-              ? 'hover:border-navy-100 focus:border-navy-200 focus:bg-navy-50/50'
+              ? 'hover:border-line focus:border-line-2 focus:bg-surface-2'
               : 'cursor-default'
           }`}
         />
@@ -121,13 +121,13 @@ export function TaskCard({
             <button
               onPointerDown={stop}
               onClick={() => setMenuOpen((v) => !v)}
-              className="rounded-md px-1.5 py-0.5 text-navy-300 opacity-0 transition hover:bg-navy-50 hover:text-navy-600 group-hover:opacity-100"
+              className="rounded-md px-1.5 py-0.5 text-ink-3 opacity-0 transition hover:bg-surface-2 hover:text-ink-2 group-hover:opacity-100"
               aria-label="Task options"
             >
               ⋯
             </button>
             {menuOpen ? (
-              <div className="absolute right-0 top-7 z-30 w-32 overflow-hidden rounded-lg border border-navy-100 bg-white py-1 shadow-pop">
+              <div className="absolute right-0 top-7 z-30 w-32 overflow-hidden rounded-lg border border-line bg-surface py-1 shadow-e2">
                 <button
                   onPointerDown={stop}
                   onClick={() => {
@@ -135,7 +135,7 @@ export function TaskCard({
                     if (window.confirm(`Delete task "${task.title}"?`))
                       board.deleteTask(task.id)
                   }}
-                  className="block w-full px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
+                  className="block w-full px-3 py-2 text-left text-sm text-st-cancelled-fg transition hover:bg-st-cancelled-bg"
                 >
                   Delete task
                 </button>
@@ -161,8 +161,8 @@ export function TaskCard({
           onClick={() => setCommentsOpen((v) => !v)}
           className={`inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium transition ${
             commentCount > 0
-              ? 'text-navy-600 hover:bg-navy-50'
-              : 'text-navy-400 hover:bg-navy-50'
+              ? 'text-ink-2 hover:bg-surface-2'
+              : 'text-ink-3 hover:bg-surface-2'
           }`}
           title="Comments"
         >
