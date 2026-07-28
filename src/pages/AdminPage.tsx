@@ -77,7 +77,7 @@ function PeopleTab({
   const { profiles } = admin
   return (
     <div className="overflow-hidden rounded-xl border border-navy-100 bg-white shadow-card">
-      <div className="grid grid-cols-12 gap-2 border-b border-navy-100 bg-navy-50/60 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-navy-400">
+      <div className="hidden grid-cols-12 gap-2 border-b border-navy-100 bg-navy-50/60 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-navy-400 md:grid">
         <div className="col-span-4">Person</div>
         <div className="col-span-2">Role</div>
         <div className="col-span-2">Access</div>
@@ -118,9 +118,9 @@ function PersonRow({
   const displayName = profile.full_name?.trim() || profile.moodle_username || '—'
 
   return (
-    <div className="grid grid-cols-12 items-center gap-2 border-b border-navy-50 px-4 py-3 last:border-0">
+    <div className="border-b border-navy-50 p-4 last:border-0 md:grid md:grid-cols-12 md:items-center md:gap-2 md:px-4 md:py-3">
       {/* Person */}
-      <div className="col-span-4 min-w-0">
+      <div className="min-w-0 md:col-span-4">
         <div className="truncate text-sm font-semibold text-navy-900">
           {displayName}
           {isSelf ? (
@@ -137,7 +137,10 @@ function PersonRow({
       </div>
 
       {/* Role */}
-      <div className="col-span-2">
+      <div className="mt-3 flex items-center md:col-span-2 md:mt-0">
+        <span className="w-24 shrink-0 text-[11px] font-semibold uppercase tracking-wide text-navy-400 md:hidden">
+          Role
+        </span>
         <span
           className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
             isAdmin
@@ -160,7 +163,10 @@ function PersonRow({
       </div>
 
       {/* Access */}
-      <div className="col-span-2">
+      <div className="mt-2 flex items-center md:col-span-2 md:mt-0">
+        <span className="w-24 shrink-0 text-[11px] font-semibold uppercase tracking-wide text-navy-400 md:hidden">
+          Access
+        </span>
         <button
           disabled={isSelf}
           onClick={() => admin.setActive(profile.id, !profile.is_active)}
@@ -181,12 +187,15 @@ function PersonRow({
       </div>
 
       {/* Last login */}
-      <div className="col-span-1 text-xs text-navy-400">
+      <div className="mt-2 flex items-center text-xs text-navy-400 md:col-span-1 md:mt-0">
+        <span className="w-24 shrink-0 text-[11px] font-semibold uppercase tracking-wide text-navy-400 md:hidden">
+          Last login
+        </span>
         {relativeTime(profile.last_login_at)}
       </div>
 
       {/* Roster link */}
-      <div className="col-span-3">
+      <div className="mt-3 md:col-span-3 md:mt-0">
         {linked ? (
           <div className="flex items-center gap-2">
             <Avatar intern={linked} />

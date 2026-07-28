@@ -7,6 +7,7 @@ import { ROLE_LABELS } from '../types'
 import { roleDotClass } from '../lib/roleStyles'
 import { useInterns } from '../hooks/useInterns'
 import type { UseTeams } from '../hooks/useTeams'
+import { Popover } from './Popover'
 
 const SHORT_ROLE: Record<Role, string> = {
   developer: 'Software Dev',
@@ -63,12 +64,16 @@ function MemberRow({
       >
         {member.name}
       </span>
-      <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-navy-400">
+      <span
+        className={`shrink-0 text-[10px] font-semibold uppercase tracking-wide text-navy-400 transition ${
+          isAdmin ? 'group-hover/mem:opacity-0' : ''
+        }`}
+      >
         {SHORT_ROLE[member.role]}
       </span>
 
       {isAdmin ? (
-        <span className="absolute inset-y-0 right-0 flex items-center gap-0.5 bg-gradient-to-l from-navy-50 via-navy-50/95 to-transparent pl-4 pr-1.5 opacity-0 transition group-hover/mem:opacity-100">
+        <span className="absolute inset-y-0 right-1.5 flex items-center gap-1 opacity-0 transition group-hover/mem:opacity-100">
           <button
             onPointerDown={stop}
             onClick={() => api.toggleMemberActive(member.id, inactive)}
@@ -92,30 +97,18 @@ function MemberRow({
 }
 
 function AddMemberPopover({
+  anchorEl,
   teamMembers,
   onPick,
   onClose,
 }: {
+  anchorEl: HTMLElement | null
   teamMembers: TeamMember[]
   onPick: (intern: Intern) => void
   onClose: () => void
 }) {
   const { interns } = useInterns()
-  const ref = useRef<HTMLDivElement>(null)
   const [q, setQ] = useState('')
-
-  useEffect(() => {
-    const onDown = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) onClose()
-    }
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
-    window.addEventListener('mousedown', onDown)
-    window.addEventListener('keydown', onKey)
-    return () => {
-      window.removeEventListener('mousedown', onDown)
-      window.removeEventListener('keydown', onKey)
-    }
-  }, [onClose])
 
   const onTeamIds = new Set(
     teamMembers.map((m) => m.intern_id).filter((id): id is string => Boolean(id)),
@@ -131,11 +124,8 @@ function AddMemberPopover({
   )
 
   return (
-    <div
-      ref={ref}
-      className="absolute bottom-full left-2 right-2 z-40 mb-1 animate-fade-in overflow-hidden rounded-xl border border-navy-100 bg-white shadow-pop"
-    >
-      <div className="border-b border-navy-100 p-2">
+    <Popover anchorEl={anchorEl} onClose={onClose} width={256} align="left">
+      <div className="shrink-0 border-b border-navy-100 p-2">
         <input
           autoFocus
           value={q}
@@ -144,7 +134,7 @@ function AddMemberPopover({
           className="w-full rounded-lg border border-navy-200 bg-white px-2.5 py-1.5 text-sm text-navy-900 outline-none focus:border-sunburst-500"
         />
       </div>
-      <div className="max-h-56 overflow-y-auto fi-scroll py-1">
+      <div className="min-h-0 flex-1 overflow-y-auto fi-scroll py-1">
         {candidates.length === 0 ? (
           <p className="px-3 py-4 text-center text-xs text-navy-400">
             No matching roster records.
@@ -172,7 +162,7 @@ function AddMemberPopover({
           ))
         )}
       </div>
-    </div>
+    </Popover>
   )
 }
 
@@ -219,6 +209,7 @@ export function TeamCard({
   const [projectDraft, setProjectDraft] = useState('')
   const [addMemberOpen, setAddMemberOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
+  const addMemberBtnRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => setDraft(team.name), [team.name])
 
@@ -255,14 +246,14 @@ export function TeamCard({
       ref={setNodeRef}
       style={style}
       {...attributes}
-      className={`flex flex-col overflow-hidden rounded-xl border bg-white shadow-card transition ${
+      className={`flex flex-col rounded-xl border bg-white shadow-card transition ${
         isMemberDropTarget
           ? 'border-sunburst-400 ring-2 ring-sunburst-400/40'
           : 'border-navy-100'
       }`}
     >
       {/* Header */}
-      <div className="border-b border-navy-100 bg-gradient-to-r from-navy-50 to-white px-3 py-2">
+      <div className="rounded-t-xl border-b border-navy-100 bg-gradient-to-r from-navy-50 to-white px-3 py-2">
         <div className="flex items-center gap-1.5">
           {isAdmin ? (
             <button
@@ -419,8 +410,9 @@ export function TeamCard({
 
       {/* Add member */}
       {isAdmin ? (
-        <div className="relative border-t border-navy-100 p-2">
+        <div className="border-t border-navy-100 p-2">
           <button
+            ref={addMemberBtnRef}
             onClick={() => setAddMemberOpen((v) => !v)}
             className="flex w-full items-center justify-center gap-1 rounded-lg border border-dashed border-navy-200 py-1.5 text-[11px] font-semibold text-navy-400 transition hover:border-sunburst-400 hover:text-sunburst-600"
           >
@@ -428,6 +420,7 @@ export function TeamCard({
           </button>
           {addMemberOpen ? (
             <AddMemberPopover
+              anchorEl={addMemberBtnRef.current}
               teamMembers={members}
               onPick={(intern) => api.addMember(team.id, intern)}
               onClose={() => setAddMemberOpen(false)}

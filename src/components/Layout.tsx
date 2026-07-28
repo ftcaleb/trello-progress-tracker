@@ -24,57 +24,42 @@ export function Layout() {
     '?'
   ).toUpperCase()
 
+  const navLinkClass = ({ isActive }: { isActive: boolean }) =>
+    `flex shrink-0 items-center gap-2 rounded-lg border px-2.5 py-2 text-sm font-semibold transition sm:px-3 ${
+      isActive
+        ? 'border-sunburst-400 bg-sunburst-500 text-white'
+        : 'border-white/15 bg-white/10 text-white hover:bg-white/20'
+    }`
+
   return (
     <div className="flex h-screen flex-col bg-navy-50">
-      <header className="z-30 flex shrink-0 items-center justify-between gap-4 bg-navy-900 px-5 py-3 text-white shadow-lift">
-        <Link to="/" className="flex items-center gap-3">
+      <header className="z-30 flex shrink-0 items-center justify-between gap-2 bg-navy-900 px-3 py-2.5 text-white shadow-lift sm:gap-4 sm:px-5 sm:py-3">
+        <Link to="/" className="flex shrink-0 items-center gap-3">
           <img
             src={logoDark}
             alt="FI Project Tracker"
-            className="h-12 w-auto sm:h-14"
+            className="h-8 w-auto max-w-[8rem] object-contain sm:h-14 sm:max-w-none"
           />
         </Link>
 
-        <div className="flex items-center gap-2 sm:gap-3">
-          <NavLink
-            to="/teams"
-            className={({ isActive }) =>
-              `flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition ${
-                isActive
-                  ? 'border-sunburst-400 bg-sunburst-500 text-white'
-                  : 'border-white/15 bg-white/10 text-white hover:bg-white/20'
-              }`
-            }
-          >
+        <div className="flex min-w-0 flex-wrap items-center justify-end gap-1.5 sm:gap-2">
+          <NavLink to="/" end className={navLinkClass}>
+            <span aria-hidden="true">🏠</span>
+            <span className="hidden sm:inline">Home</span>
+          </NavLink>
+
+          <NavLink to="/teams" className={navLinkClass}>
             <span aria-hidden="true">👥</span>
             <span className="hidden sm:inline">Teams</span>
           </NavLink>
 
-          <NavLink
-            to="/attendance"
-            className={({ isActive }) =>
-              `flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition ${
-                isActive
-                  ? 'border-sunburst-400 bg-sunburst-500 text-white'
-                  : 'border-white/15 bg-white/10 text-white hover:bg-white/20'
-              }`
-            }
-          >
+          <NavLink to="/attendance" className={navLinkClass}>
             <span aria-hidden="true">🗓️</span>
             <span className="hidden sm:inline">Attendance</span>
           </NavLink>
 
           {isAdmin ? (
-            <NavLink
-              to="/admin"
-              className={({ isActive }) =>
-                `flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition ${
-                  isActive
-                    ? 'border-sunburst-400 bg-sunburst-500 text-white'
-                    : 'border-white/15 bg-white/10 text-white hover:bg-white/20'
-                }`
-              }
-            >
+            <NavLink to="/admin" className={navLinkClass}>
               <span aria-hidden="true">🛡️</span>
               <span className="hidden sm:inline">Admin</span>
             </NavLink>
@@ -83,9 +68,9 @@ export function Layout() {
           {isAdmin ? (
             <button
               onClick={() => setManagerOpen(true)}
-              className="flex items-center gap-2 rounded-lg border border-white/15 bg-white/10 px-3 py-2 text-sm font-medium transition hover:bg-white/20"
+              className="flex shrink-0 items-center gap-2 rounded-lg border border-white/15 bg-white/10 px-2.5 py-2 text-sm font-medium transition hover:bg-white/20 sm:px-3"
             >
-              <span aria-hidden="true">👥</span>
+              <span aria-hidden="true">🧑‍💼</span>
               <span className="hidden sm:inline">Interns</span>
               <span className="rounded-full bg-black/25 px-1.5 text-xs">
                 {interns.length}
@@ -93,20 +78,23 @@ export function Layout() {
             </button>
           ) : null}
 
-          <div className="hidden items-center gap-2 rounded-lg bg-white/5 px-3 py-1.5 sm:flex">
+          <div className="hidden min-w-0 items-center gap-2 rounded-lg bg-white/5 px-3 py-1.5 lg:flex">
             <span className="h-6 w-6 shrink-0 rounded-full bg-gradient-to-br from-sunburst-500 to-maroon-600 text-center text-xs font-bold leading-6">
               {avatarLetter}
             </span>
-            <span className="max-w-[14rem] truncate text-xs text-white/70">
+            <span className="max-w-[10rem] truncate text-xs text-white/70">
               {displayName}
             </span>
           </div>
 
           <button
             onClick={() => void signOut()}
-            className="rounded-lg border border-white/15 px-3 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10 hover:text-white"
+            aria-label="Sign out"
+            title="Sign out"
+            className="flex shrink-0 items-center gap-2 rounded-lg border border-white/15 px-2.5 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10 hover:text-white sm:px-3"
           >
-            Sign out
+            <span aria-hidden="true">⏻</span>
+            <span className="hidden sm:inline">Sign out</span>
           </button>
         </div>
       </header>

@@ -40,24 +40,26 @@ export function CommentsPopover({
   onClose: () => void
 }) {
   const ref = useRef<HTMLDivElement>(null)
-  const [pos, setPos] = useState<{ top: number; left: number }>({
-    top: -9999,
-    left: -9999,
-  })
+  const [pos, setPos] = useState<{
+    top: number
+    left: number
+    width: number
+    maxHeight: number
+  }>({ top: -9999, left: -9999, width: WIDTH, maxHeight: MAX_HEIGHT })
   const [draft, setDraft] = useState('')
 
   const reposition = () => {
     const r = anchorEl.getBoundingClientRect()
+    // Never exceed the viewport (small phones are narrower than WIDTH).
+    const width = Math.min(WIDTH, window.innerWidth - 16)
+    const maxHeight = Math.min(MAX_HEIGHT, window.innerHeight - 16)
     const spaceRight = window.innerWidth - r.right
     const left =
-      spaceRight > WIDTH + 16
+      spaceRight > width + 16
         ? r.right + 8
-        : Math.max(8, r.left - WIDTH - 8)
-    const top = Math.min(
-      Math.max(8, r.top),
-      window.innerHeight - MAX_HEIGHT - 8,
-    )
-    setPos({ top, left })
+        : Math.max(8, Math.min(r.left, window.innerWidth - width - 8))
+    const top = Math.max(8, Math.min(r.top, window.innerHeight - maxHeight - 8))
+    setPos({ top, left, width, maxHeight })
   }
 
   useLayoutEffect(() => {
@@ -133,8 +135,8 @@ export function CommentsPopover({
         position: 'fixed',
         top: pos.top,
         left: pos.left,
-        width: WIDTH,
-        maxHeight: MAX_HEIGHT,
+        width: pos.width,
+        maxHeight: pos.maxHeight,
       }}
       className="z-[60] flex animate-fade-in flex-col overflow-hidden rounded-xl border border-navy-100 bg-white shadow-modal"
       onClick={(e) => e.stopPropagation()}

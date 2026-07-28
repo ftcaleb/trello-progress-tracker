@@ -264,10 +264,10 @@ function ProjectMatrix({
       </div>
 
       <div className="overflow-x-auto fi-scroll">
-        <table className="w-full border-collapse text-sm">
+        <table className="w-max min-w-full border-collapse text-sm">
           <thead>
             <tr>
-              <th className="sticky left-0 z-10 bg-white px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-navy-400">
+              <th className="sticky left-0 z-10 min-w-[9rem] bg-white px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-navy-400">
                 Intern
               </th>
               {sessions.map((s) => (

@@ -1,46 +1,27 @@
-import { useEffect, useRef } from 'react'
 import type { Intern } from '../types'
 import { ROLE_LABELS } from '../types'
 import { roleDotClass } from '../lib/roleStyles'
+import { Popover } from './Popover'
 
 export function AssignPopover({
+  anchorEl,
   interns,
   assignedIds,
   onToggle,
   onClose,
 }: {
+  anchorEl: HTMLElement | null
   interns: Intern[]
   assignedIds: Set<string>
   onToggle: (internId: string, assigned: boolean) => void
   onClose: () => void
 }) {
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const onDown = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) onClose()
-    }
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    window.addEventListener('mousedown', onDown)
-    window.addEventListener('keydown', onKey)
-    return () => {
-      window.removeEventListener('mousedown', onDown)
-      window.removeEventListener('keydown', onKey)
-    }
-  }, [onClose])
-
   return (
-    <div
-      ref={ref}
-      className="absolute right-0 top-10 z-40 w-64 animate-fade-in overflow-hidden rounded-xl border border-navy-100 bg-white shadow-pop"
-      onClick={(e) => e.stopPropagation()}
-    >
-      <div className="border-b border-navy-100 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-navy-400">
+    <Popover anchorEl={anchorEl} onClose={onClose} width={256} align="right">
+      <div className="shrink-0 border-b border-navy-100 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-navy-400">
         Assign interns
       </div>
-      <div className="max-h-64 overflow-y-auto fi-scroll py-1">
+      <div className="min-h-0 flex-1 overflow-y-auto fi-scroll py-1">
         {interns.length === 0 ? (
           <p className="px-3 py-4 text-center text-xs text-navy-400">
             No interns yet. Add them from the Interns menu.
@@ -75,6 +56,6 @@ export function AssignPopover({
           })
         )}
       </div>
-    </div>
+    </Popover>
   )
 }

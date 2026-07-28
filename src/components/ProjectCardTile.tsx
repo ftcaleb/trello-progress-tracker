@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { Intern, Project } from '../types'
 import { WEEKDAY_SHORT } from '../types'
@@ -25,6 +25,7 @@ export function ProjectCardTile({
   const navigate = useNavigate()
   const { isAdmin } = useAuth()
   const [assignOpen, setAssignOpen] = useState(false)
+  const assignBtnRef = useRef<HTMLButtonElement>(null)
   const assignedIds = new Set(interns.map((i) => i.id))
 
   const total = progress.totalPhases || 4
@@ -50,6 +51,7 @@ export function ProjectCardTile({
         {isAdmin ? (
           <div className="relative shrink-0">
             <button
+              ref={assignBtnRef}
               onClick={(e) => {
                 e.stopPropagation()
                 setAssignOpen((v) => !v)
@@ -60,6 +62,7 @@ export function ProjectCardTile({
             </button>
             {assignOpen ? (
               <AssignPopover
+                anchorEl={assignBtnRef.current}
                 interns={allInterns}
                 assignedIds={assignedIds}
                 onToggle={onToggleAssign}
