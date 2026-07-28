@@ -21,7 +21,7 @@ import { TeamCard } from '../components/TeamCard'
 import { ROLE_LABELS, ROLE_ORDER } from '../types'
 import { roleDotClass } from '../lib/roleStyles'
 
-type ActiveType = 'team' | 'member' | null
+type ActiveType = 'team' | null
 
 export function TeamsPage() {
   const api = useTeams()
@@ -30,9 +30,9 @@ export function TeamsPage() {
 
   const {
     teams,
-    members,
-    membersByTeam,
+    internsByTeam,
     projectsByTeam,
+    internsByProject,
     loading,
     loadError,
     reload,
@@ -86,16 +86,6 @@ export function TeamsPage() {
       const next = arrayMove(order, from, to)
       setOrder(next)
       void api.reorderTeams(next)
-      return
-    }
-
-    if (type === 'member') {
-      const fromTeam = active.data.current?.teamId as string | undefined
-      const overId = String(over.id)
-      const targetTeam = teamById.has(overId) ? overId : undefined
-      if (targetTeam && fromTeam && targetTeam !== fromTeam) {
-        void api.moveMember(String(active.id), targetTeam)
-      }
     }
   }
 
@@ -107,10 +97,6 @@ export function TeamsPage() {
     }
   }
 
-  const activeMember =
-    activeType === 'member' && activeId
-      ? members.find((m) => m.id === activeId)
-      : undefined
   const activeTeam =
     activeType === 'team' && activeId ? teamById.get(activeId) : undefined
 
@@ -120,15 +106,15 @@ export function TeamsPage() {
         {/* Header */}
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="text-2xl font-extrabold tracking-tight text-navy-900 sm:text-3xl">
+            <h1 className="font-display text-2xl font-bold tracking-tight text-ink sm:text-3xl">
               Cohort{' '}
               <span className="bg-gradient-to-r from-sunburst-500 to-maroon-600 bg-clip-text text-transparent">
                 Teams
               </span>
             </h1>
-            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-navy-400">
+            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-3">
               <span>{teams.length} teams</span>
-              <span className="hidden h-3 w-px bg-navy-200 sm:inline-block" />
+              <span className="hidden h-3 w-px bg-surface-3 sm:inline-block" />
               {ROLE_ORDER.map((r) => (
                 <span key={r} className="inline-flex items-center gap-1.5">
                   <span className={`h-2 w-2 rounded-full ${roleDotClass[r]}`} />
@@ -137,9 +123,9 @@ export function TeamsPage() {
               ))}
               {isAdmin ? (
                 <>
-                  <span className="hidden h-3 w-px bg-navy-200 sm:inline-block" />
-                  <span className="text-navy-400">
-                    Drag ⠿ to reorder · drag a member to reassign
+                  <span className="hidden h-3 w-px bg-surface-3 sm:inline-block" />
+                  <span className="text-ink-3">
+                    Drag ⠿ to reorder · people follow their projects
                   </span>
                 </>
               ) : null}
@@ -161,11 +147,11 @@ export function TeamsPage() {
                     }
                   }}
                   placeholder="Team name…"
-                  className="rounded-xl border border-navy-200 bg-white px-3 py-2 text-sm text-navy-900 outline-none focus:border-sunburst-500"
+                  className="rounded-xl border border-line-2 bg-surface px-3 py-2 text-sm text-ink outline-none focus:border-sunburst-500"
                 />
                 <button
                   onClick={commitTeam}
-                  className="rounded-xl bg-navy-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-navy-800"
+                  className="rounded-xl bg-rail px-4 py-2 text-sm font-semibold text-rail-ink transition hover:opacity-90"
                 >
                   Add
                 </button>
@@ -174,7 +160,7 @@ export function TeamsPage() {
                     setTeamDraft('')
                     setAddingTeam(false)
                   }}
-                  className="rounded-xl px-3 py-2 text-sm font-medium text-navy-500 transition hover:bg-navy-50"
+                  className="rounded-xl px-3 py-2 text-sm font-medium text-ink-3 transition hover:bg-surface-2"
                 >
                   Cancel
                 </button>
@@ -182,7 +168,7 @@ export function TeamsPage() {
             ) : (
               <button
                 onClick={() => setAddingTeam(true)}
-                className="inline-flex items-center gap-2 rounded-xl bg-navy-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-800"
+                className="inline-flex items-center gap-2 rounded-xl bg-rail px-4 py-2.5 text-sm font-semibold text-rail-ink shadow-e1 transition hover:opacity-90"
               >
                 <span aria-hidden="true">＋</span> New team
               </button>
@@ -204,7 +190,7 @@ export function TeamsPage() {
             onDragEnd={onDragEnd}
           >
             <SortableContext items={order} strategy={rectSortingStrategy}>
-              <div className="grid grid-cols-1 items-start gap-3.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {order.map((teamId) => {
                   const team = teamById.get(teamId)
                   if (!team) return null
@@ -212,11 +198,11 @@ export function TeamsPage() {
                     <TeamCard
                       key={team.id}
                       team={team}
-                      members={membersByTeam.get(team.id) ?? []}
+                      members={internsByTeam.get(team.id) ?? []}
                       projects={projectsByTeam.get(team.id) ?? []}
+                      internsByProject={internsByProject}
                       api={api}
                       isAdmin={isAdmin}
-                      activeType={activeType}
                     />
                   )
                 })}
@@ -224,18 +210,9 @@ export function TeamsPage() {
             </SortableContext>
 
             <DragOverlay dropAnimation={null}>
-              {activeMember ? (
-                <div className="flex w-56 items-center gap-2 rounded-lg border border-navy-200 bg-white px-2.5 py-1.5 shadow-lift">
-                  <span
-                    className={`h-2 w-2 shrink-0 rounded-full ${roleDotClass[activeMember.role]}`}
-                  />
-                  <span className="truncate text-[13px] font-medium text-navy-900">
-                    {activeMember.name}
-                  </span>
-                </div>
-              ) : activeTeam ? (
-                <div className="w-72 rotate-1 rounded-2xl border border-navy-200 bg-white px-4 py-3 shadow-lift">
-                  <span className="text-base font-extrabold text-navy-900">
+              {activeTeam ? (
+                <div className="w-72 rotate-1 rounded-2xl border border-line-2 bg-surface px-4 py-3 shadow-e3">
+                  <span className="text-base font-extrabold text-ink">
                     {activeTeam.name}
                   </span>
                 </div>
@@ -254,7 +231,7 @@ function SkeletonGrid() {
       {Array.from({ length: 6 }).map((_, i) => (
         <div
           key={i}
-          className="rounded-2xl border border-navy-100 bg-white p-5 shadow-card"
+          className="rounded-2xl border border-line bg-surface p-5 shadow-e1"
         >
           <div className="fi-skeleton h-6 w-1/2 rounded" />
           <div className="fi-skeleton mt-3 h-5 w-2/3 rounded-full" />
@@ -271,12 +248,12 @@ function SkeletonGrid() {
 
 function EmptyState() {
   return (
-    <div className="rounded-2xl border border-dashed border-navy-200 bg-white py-16 text-center">
+    <div className="rounded-2xl border border-dashed border-line-2 bg-surface py-16 text-center">
       <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-sunburst-400 to-maroon-600 text-xl">
         👥
       </div>
-      <h2 className="text-lg font-bold text-navy-900">No teams yet</h2>
-      <p className="mt-1 text-sm text-navy-400">
+      <h2 className="text-lg font-bold text-ink">No teams yet</h2>
+      <p className="mt-1 text-sm text-ink-3">
         Teams will appear here once they're created.
       </p>
     </div>
@@ -291,10 +268,10 @@ function ErrorState({
   onRetry: () => void
 }) {
   return (
-    <div className="mx-auto max-w-md rounded-2xl border border-sunburst-200 bg-sunburst-50/50 p-8 text-center">
+    <div className="mx-auto max-w-md rounded-2xl border border-st-pending bg-st-pending-bg p-8 text-center">
       <div className="mb-2 text-2xl">⚠️</div>
-      <h2 className="text-lg font-bold text-navy-900">Could not load teams</h2>
-      <p className="mt-1 text-sm text-navy-500">{message}</p>
+      <h2 className="text-lg font-bold text-ink">Could not load teams</h2>
+      <p className="mt-1 text-sm text-ink-3">{message}</p>
       <button
         onClick={onRetry}
         className="mt-4 rounded-xl bg-sunburst-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sunburst-600"

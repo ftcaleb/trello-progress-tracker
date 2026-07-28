@@ -8,6 +8,7 @@ import type {
   PhaseReport,
   Project,
   ProjectIntern,
+  Team,
 } from '../types'
 
 interface TaskLite {
@@ -22,6 +23,7 @@ interface PortfolioState {
   assignments: ProjectIntern[]
   tasks: TaskLite[]
   reports: PhaseReport[]
+  teams: Team[]
 }
 
 const EMPTY: PortfolioState = {
@@ -30,6 +32,11 @@ const EMPTY: PortfolioState = {
   assignments: [],
   tasks: [],
   reports: [],
+  teams: [],
+}
+
+function msg(e: unknown): string {
+  return e instanceof Error ? e.message : 'unknown error'
 }
 
 export interface ProjectProgress {
@@ -46,26 +53,28 @@ export function usePortfolio() {
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
 
-  const { projects, phases, assignments, tasks, reports } = state
+  const { projects, phases, assignments, tasks, reports, teams } = state
 
   const loadAll = useCallback(async () => {
     setLoading(true)
     setLoadError(null)
     try {
-      const [projectsR, phasesR, assignmentsR, tasksR, reportsR] =
+      const [projectsR, phasesR, assignmentsR, tasksR, reportsR, teamsR] =
         await Promise.all([
           supabase.from('projects').select('*').order('name'),
           supabase.from('phases').select('*').order('position'),
           supabase.from('project_interns').select('*'),
           supabase.from('tasks').select('id, project_id, phase_id'),
           supabase.from('phase_reports').select('*'),
+          supabase.from('teams').select('*').order('position'),
         ])
       const err =
         projectsR.error ||
         phasesR.error ||
         assignmentsR.error ||
         tasksR.error ||
-        reportsR.error
+        reportsR.error ||
+        teamsR.error
       if (err) throw err
 
       setState({
@@ -74,6 +83,7 @@ export function usePortfolio() {
         assignments: (assignmentsR.data as ProjectIntern[]) ?? [],
         tasks: (tasksR.data as TaskLite[]) ?? [],
         reports: (reportsR.data as PhaseReport[]) ?? [],
+        teams: (teamsR.data as Team[]) ?? [],
       })
     } catch (e) {
       setLoadError(e instanceof Error ? e.message : 'Failed to load portfolio.')
@@ -195,6 +205,84 @@ export function usePortfolio() {
     }
   }, [projects, latestReportByProject, toast])
 
+  // ---- Project CRUD -------------------------------------------------------
+  /** Create a real project. Sensible standup defaults; edit the rest in Settings. */
+  const createProject = useCallback(
+    async (name: string, teamId: string | null = null) => {
+      const trimmed = name.trim()
+      if (!trimmed) return null
+      try {
+        const { data, error } = await supabase
+          .from('projects')
+          .insert({
+            name: trimmed,
+            standup_day: 'Monday',
+            standup_time: '09:00',
+            team_id: teamId,
+          })
+          .select()
+          .single()
+        if (error) throw error
+        const created = data as Project
+        setState((s) => ({ ...s, projects: [...s.projects, created] }))
+        return created
+      } catch (e) {
+        toast.error(`Could not create project: ${msg(e)}`)
+        return null
+      }
+    },
+    [toast],
+  )
+
+  /** Delete a project and all of its children via the admin-only RPC. */
+  const deleteProject = useCallback(
+    async (projectId: string) => {
+      const snapshot = state
+      setState((s) => ({
+        ...s,
+        projects: s.projects.filter((p) => p.id !== projectId),
+        assignments: s.assignments.filter((a) => a.project_id !== projectId),
+        phases: s.phases.filter((p) => p.project_id !== projectId),
+        tasks: s.tasks.filter((t) => t.project_id !== projectId),
+        reports: s.reports.filter((r) => r.project_id !== projectId),
+      }))
+      try {
+        const { error } = await supabase.rpc('delete_project', {
+          p_id: projectId,
+        })
+        if (error) throw error
+      } catch (e) {
+        setState(snapshot)
+        toast.error(`Could not delete project: ${msg(e)}`)
+      }
+    },
+    [state, toast],
+  )
+
+  /** Assign / move a project to a group (null = Unassigned). */
+  const setProjectGroup = useCallback(
+    async (projectId: string, teamId: string | null) => {
+      const snapshot = projects
+      setState((s) => ({
+        ...s,
+        projects: s.projects.map((p) =>
+          p.id === projectId ? { ...p, team_id: teamId } : p,
+        ),
+      }))
+      try {
+        const { error } = await supabase
+          .from('projects')
+          .update({ team_id: teamId })
+          .eq('id', projectId)
+        if (error) throw error
+      } catch (e) {
+        setState((s) => ({ ...s, projects: snapshot }))
+        toast.error(`Could not change group: ${msg(e)}`)
+      }
+    },
+    [projects, toast],
+  )
+
   // ---- Assignment toggle --------------------------------------------------
   const setAssignment = useCallback(
     async (projectId: string, internId: string, assigned: boolean) => {
@@ -249,6 +337,10 @@ export function usePortfolio() {
     copyAllReports,
     assignments,
     setAssignment,
+    teams,
+    createProject,
+    deleteProject,
+    setProjectGroup,
   }
 }
 

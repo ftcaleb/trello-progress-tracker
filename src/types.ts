@@ -8,6 +8,7 @@ export interface Project {
   standup_day: string
   standup_time: string
   initial_meet_date: string | null
+  team_id: string | null
   created_at: string
 }
 

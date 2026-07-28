@@ -1,162 +1,166 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
-import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
-import type { Intern, Role, Team, TeamMember, TeamProject } from '../types'
-import { ROLE_LABELS } from '../types'
-import { roleDotClass } from '../lib/roleStyles'
-import { useInterns } from '../hooks/useInterns'
+import type { Intern, Project, Team } from '../types'
+import { AvatarStack } from './Avatar'
 import type { UseTeams } from '../hooks/useTeams'
 import { Popover } from './Popover'
 
-const SHORT_ROLE: Record<Role, string> = {
-  developer: 'Software Dev',
-  designer: 'Designer',
-  cybersecurity: 'Cyber Analyst',
-}
-
-/** A compact, draggable table row. Role is shown as a color dot + short label. */
-function MemberRow({
-  member,
-  api,
+/** One project inside a group: its name, its assigned devs, and a move menu. */
+function ProjectRow({
+  project,
+  devs,
+  teams,
   isAdmin,
+  onMove,
 }: {
-  member: TeamMember
-  api: UseTeams
+  project: Project
+  devs: Intern[]
+  teams: Team[]
   isAdmin: boolean
+  onMove: (teamId: string | null) => void
 }) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } =
-    useDraggable({
-      id: member.id,
-      data: { type: 'member', teamId: member.team_id },
-      disabled: !isAdmin,
-    })
-
-  const style = transform
-    ? { transform: CSS.Translate.toString(transform) }
-    : undefined
-
-  const stop = (e: React.PointerEvent) => e.stopPropagation()
-  const inactive = !member.is_active
+  const [open, setOpen] = useState(false)
+  const btnRef = useRef<HTMLButtonElement>(null)
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...(isAdmin ? attributes : {})}
-      {...(isAdmin ? listeners : {})}
-      title={`${member.name} · ${ROLE_LABELS[member.role]}${inactive ? ' · inactive' : ''}`}
-      className={`group/mem relative flex items-center gap-2 border-b border-navy-50 px-2.5 py-1.5 transition last:border-0 ${
-        isAdmin ? 'cursor-grab hover:bg-navy-50 active:cursor-grabbing' : ''
-      } ${isDragging ? 'opacity-40' : ''} ${inactive ? 'bg-navy-50/40' : ''}`}
-    >
-      <span
-        className={`h-2 w-2 shrink-0 rounded-full ${roleDotClass[member.role]} ${
-          inactive ? 'opacity-40' : ''
-        }`}
-      />
-      <span
-        className={`min-w-0 flex-1 truncate text-[13px] font-medium ${
-          inactive
-            ? 'text-navy-400 line-through decoration-navy-300'
-            : 'text-navy-800'
-        }`}
-      >
-        {member.name}
-      </span>
-      <span
-        className={`shrink-0 text-[10px] font-semibold uppercase tracking-wide text-navy-400 transition ${
-          isAdmin ? 'group-hover/mem:opacity-0' : ''
-        }`}
-      >
-        {SHORT_ROLE[member.role]}
-      </span>
-
-      {isAdmin ? (
-        <span className="absolute inset-y-0 right-1.5 flex items-center gap-1 opacity-0 transition group-hover/mem:opacity-100">
-          <button
-            onPointerDown={stop}
-            onClick={() => api.toggleMemberActive(member.id, inactive)}
-            title={inactive ? 'Mark active' : 'Mark inactive'}
-            className="rounded px-1 text-[11px] leading-none text-navy-400 transition hover:text-navy-700"
-          >
-            {inactive ? '○' : '◐'}
-          </button>
-          <button
-            onPointerDown={stop}
-            onClick={() => api.removeMember(member.id)}
-            title="Remove from team"
-            className="rounded px-1 text-[11px] leading-none text-navy-300 transition hover:text-red-600"
-          >
-            ✕
-          </button>
+    <div className="border-b border-line px-3 py-2.5 last:border-0">
+      <div className="flex items-center justify-between gap-2">
+        <span className="truncate text-[13px] font-semibold text-ink">
+          {project.name}
         </span>
-      ) : null}
+        {isAdmin ? (
+          <div className="relative shrink-0">
+            <button
+              ref={btnRef}
+              onClick={() => setOpen((v) => !v)}
+              aria-label="Move project"
+              className="grid h-6 w-6 place-items-center rounded text-ink-3 transition hover:bg-surface-2 hover:text-ink"
+            >
+              <span className="text-base leading-none">⋯</span>
+            </button>
+            {open ? (
+              <Popover
+                anchorEl={btnRef.current}
+                onClose={() => setOpen(false)}
+                width={220}
+                align="right"
+              >
+                <div className="border-b border-line px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-ink-3">
+                  Move project to
+                </div>
+                <div className="max-h-64 overflow-y-auto fi-scroll py-1">
+                  <MoveItem
+                    label="Unassigned"
+                    muted
+                    selected={project.team_id === null}
+                    onClick={() => {
+                      onMove(null)
+                      setOpen(false)
+                    }}
+                  />
+                  {teams.map((t) => (
+                    <MoveItem
+                      key={t.id}
+                      label={t.name}
+                      selected={project.team_id === t.id}
+                      onClick={() => {
+                        onMove(t.id)
+                        setOpen(false)
+                      }}
+                    />
+                  ))}
+                </div>
+              </Popover>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+      <div className="mt-1.5">
+        {devs.length > 0 ? (
+          <AvatarStack interns={devs} max={6} />
+        ) : (
+          <span className="text-[11px] text-ink-3">No interns assigned yet</span>
+        )}
+      </div>
     </div>
   )
 }
 
-function AddMemberPopover({
+function MoveItem({
+  label,
+  selected,
+  muted,
+  onClick,
+}: {
+  label: string
+  selected: boolean
+  muted?: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm transition hover:bg-surface-2 ${
+        selected ? 'font-semibold text-ink' : muted ? 'text-ink-3' : 'text-ink-2'
+      }`}
+    >
+      <span className="truncate">{label}</span>
+      {selected ? <span className="text-accent">●</span> : null}
+    </button>
+  )
+}
+
+/** Pull an existing project (from Unassigned or another group) into this one. */
+function AddProjectPopover({
   anchorEl,
-  teamMembers,
+  candidates,
+  teamName,
   onPick,
   onClose,
 }: {
   anchorEl: HTMLElement | null
-  teamMembers: TeamMember[]
-  onPick: (intern: Intern) => void
+  candidates: { project: Project; groupName: string | null }[]
+  teamName: string
+  onPick: (projectId: string) => void
   onClose: () => void
 }) {
-  const { interns } = useInterns()
   const [q, setQ] = useState('')
-
-  const onTeamIds = new Set(
-    teamMembers.map((m) => m.intern_id).filter((id): id is string => Boolean(id)),
+  const filtered = candidates.filter((c) =>
+    c.project.name.toLowerCase().includes(q.trim().toLowerCase()),
   )
-  const candidates = useMemo(
-    () =>
-      interns
-        .filter((i) => !onTeamIds.has(i.id))
-        .filter((i) => i.name.toLowerCase().includes(q.trim().toLowerCase()))
-        .sort((a, b) => a.name.localeCompare(b.name)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [interns, q, teamMembers],
-  )
-
   return (
-    <Popover anchorEl={anchorEl} onClose={onClose} width={256} align="left">
-      <div className="shrink-0 border-b border-navy-100 p-2">
+    <Popover anchorEl={anchorEl} onClose={onClose} width={264} align="left">
+      <div className="shrink-0 border-b border-line p-2">
         <input
           autoFocus
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Search roster…"
-          className="w-full rounded-lg border border-navy-200 bg-white px-2.5 py-1.5 text-sm text-navy-900 outline-none focus:border-sunburst-500"
+          placeholder="Search projects…"
+          className="w-full rounded-lg border border-line-2 bg-surface px-2.5 py-1.5 text-sm text-ink outline-none focus:border-sunburst-500"
         />
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto fi-scroll py-1">
-        {candidates.length === 0 ? (
-          <p className="px-3 py-4 text-center text-xs text-navy-400">
-            No matching roster records.
+        {filtered.length === 0 ? (
+          <p className="px-3 py-4 text-center text-xs text-ink-3">
+            No other projects to add.
           </p>
         ) : (
-          candidates.map((intern) => (
+          filtered.map(({ project, groupName }) => (
             <button
-              key={intern.id}
+              key={project.id}
               onClick={() => {
-                onPick(intern)
+                onPick(project.id)
                 onClose()
               }}
-              className="flex w-full items-center gap-2.5 px-3 py-1.5 text-left transition hover:bg-navy-50"
+              title={`Move “${project.name}” into ${teamName}`}
+              className="flex w-full items-center justify-between gap-2 px-3 py-1.5 text-left transition hover:bg-surface-2"
             >
-              <span
-                className={`h-2 w-2 shrink-0 rounded-full ${roleDotClass[intern.role]}`}
-              />
-              <span className="min-w-0 flex-1 truncate text-sm text-navy-800">
-                {intern.name}
+              <span className="min-w-0 flex-1 truncate text-sm text-ink">
+                {project.name}
               </span>
-              <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-navy-400">
-                {SHORT_ROLE[intern.role]}
+              <span className="shrink-0 text-[10px] font-medium uppercase tracking-wide text-ink-3">
+                {groupName ?? 'Unassigned'}
               </span>
             </button>
           ))
@@ -170,16 +174,16 @@ export function TeamCard({
   team,
   members,
   projects,
+  internsByProject,
   api,
   isAdmin,
-  activeType,
 }: {
   team: Team
-  members: TeamMember[]
-  projects: TeamProject[]
+  members: Intern[]
+  projects: Project[]
+  internsByProject: Map<string, Intern[]>
   api: UseTeams
   isAdmin: boolean
-  activeType: 'team' | 'member' | null
 }) {
   const {
     attributes,
@@ -189,7 +193,6 @@ export function TeamCard({
     transform,
     transition,
     isDragging,
-    isOver,
   } = useSortable({
     id: team.id,
     data: { type: 'team' },
@@ -205,11 +208,9 @@ export function TeamCard({
   const [menuOpen, setMenuOpen] = useState(false)
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(team.name)
-  const [addingProject, setAddingProject] = useState(false)
-  const [projectDraft, setProjectDraft] = useState('')
-  const [addMemberOpen, setAddMemberOpen] = useState(false)
+  const [addOpen, setAddOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
-  const addMemberBtnRef = useRef<HTMLButtonElement>(null)
+  const addBtnRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => setDraft(team.name), [team.name])
 
@@ -230,38 +231,38 @@ export function TeamCard({
     setEditing(false)
   }
 
-  const commitProject = () => {
-    if (projectDraft.trim()) {
-      api.addProject(team.id, projectDraft)
-      setProjectDraft('')
-      setAddingProject(false)
-    }
-  }
-
-  const isMemberDropTarget = isOver && activeType === 'member'
-  const inactiveCount = members.filter((m) => !m.is_active).length
+  // Projects available to pull in = every project not already in this group.
+  const candidates = useMemo(
+    () =>
+      api.projects
+        .filter((p) => p.team_id !== team.id)
+        .map((p) => ({
+          project: p,
+          groupName: p.team_id
+            ? (api.teams.find((t) => t.id === p.team_id)?.name ?? null)
+            : null,
+        }))
+        .sort((a, b) => a.project.name.localeCompare(b.project.name)),
+    [api.projects, api.teams, team.id],
+  )
 
   return (
     <div
       ref={setNodeRef}
       style={style}
       {...attributes}
-      className={`flex flex-col rounded-xl border bg-white shadow-card transition ${
-        isMemberDropTarget
-          ? 'border-sunburst-400 ring-2 ring-sunburst-400/40'
-          : 'border-navy-100'
-      }`}
+      className="flex flex-col rounded-xl border border-line bg-surface shadow-e1"
     >
       {/* Header */}
-      <div className="rounded-t-xl border-b border-navy-100 bg-gradient-to-r from-navy-50 to-white px-3 py-2">
+      <div className="rounded-t-xl border-b border-line bg-gradient-to-r from-surface-2 to-surface px-3 py-2">
         <div className="flex items-center gap-1.5">
           {isAdmin ? (
             <button
               ref={setActivatorNodeRef}
               {...listeners}
-              aria-label="Drag to reorder team"
+              aria-label="Drag to reorder group"
               title="Drag to reorder"
-              className="cursor-grab rounded px-0.5 text-navy-300 transition hover:text-navy-600 active:cursor-grabbing"
+              className="cursor-grab rounded px-0.5 text-ink-3 transition hover:text-ink-2 active:cursor-grabbing"
             >
               ⠿
             </button>
@@ -279,11 +280,11 @@ export function TeamCard({
                   setEditing(false)
                 }
               }}
-              className="min-w-0 flex-1 rounded-md border border-navy-200 bg-white px-2 py-0.5 text-sm font-bold text-navy-900 outline-none focus:border-sunburst-500"
+              className="min-w-0 flex-1 rounded-md border border-line-2 bg-surface px-2 py-0.5 text-sm font-bold text-ink outline-none focus:border-sunburst-500"
             />
           ) : (
             <h3
-              className="min-w-0 flex-1 truncate text-sm font-extrabold text-navy-900"
+              className="min-w-0 flex-1 truncate text-sm font-extrabold text-ink"
               title={team.name}
             >
               {team.name}
@@ -291,10 +292,8 @@ export function TeamCard({
           )}
 
           <span
-            className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-navy-100 px-1.5 text-[10px] font-bold text-navy-600"
-            title={`${members.length} member${members.length === 1 ? '' : 's'}${
-              inactiveCount ? ` · ${inactiveCount} inactive` : ''
-            }`}
+            className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-surface-3 px-1.5 text-[10px] font-bold text-ink-2"
+            title={`${members.length} ${members.length === 1 ? 'person' : 'people'} · ${projects.length} ${projects.length === 1 ? 'project' : 'projects'}`}
           >
             {members.length}
           </span>
@@ -303,36 +302,36 @@ export function TeamCard({
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setMenuOpen((v) => !v)}
-                className="rounded px-1 text-navy-400 transition hover:text-navy-700"
-                aria-label="Team options"
+                className="rounded px-1 text-ink-3 transition hover:text-ink-2"
+                aria-label="Group options"
               >
                 ⋯
               </button>
               {menuOpen ? (
-                <div className="absolute right-0 top-7 z-30 w-36 overflow-hidden rounded-lg border border-navy-100 bg-white py-1 shadow-pop">
+                <div className="absolute right-0 top-7 z-30 w-40 overflow-hidden rounded-lg border border-line bg-surface py-1 shadow-e2">
                   <button
                     onClick={() => {
                       setDraft(team.name)
                       setEditing(true)
                       setMenuOpen(false)
                     }}
-                    className="block w-full px-3 py-2 text-left text-sm text-navy-700 transition hover:bg-navy-50"
+                    className="block w-full px-3 py-2 text-left text-sm text-ink-2 transition hover:bg-surface-2"
                   >
-                    Rename team
+                    Rename group
                   </button>
                   <button
                     onClick={() => {
                       setMenuOpen(false)
                       if (
                         window.confirm(
-                          `Delete "${team.name}"? This removes the team and its member list.`,
+                          `Delete "${team.name}"? Its projects fall back to Unassigned — nothing is deleted.`,
                         )
                       )
                         api.deleteTeam(team.id)
                     }}
-                    className="block w-full px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
+                    className="block w-full px-3 py-2 text-left text-sm text-st-cancelled-fg transition hover:bg-st-cancelled-bg"
                   >
-                    Delete team
+                    Delete group
                   </button>
                 </div>
               ) : null}
@@ -340,90 +339,53 @@ export function TeamCard({
           ) : null}
         </div>
 
-        {/* Project chips */}
-        <div className="mt-1.5 flex flex-wrap items-center gap-1">
-          {projects.map((p) => (
-            <span
-              key={p.id}
-              className="group/proj inline-flex items-center gap-1 rounded-full border border-maroon-100 bg-maroon-50 px-2 py-0.5 text-[10px] font-semibold text-maroon-700"
-            >
-              {p.name}
-              {isAdmin ? (
-                <button
-                  onClick={() => api.removeProject(p.id)}
-                  title="Remove project"
-                  className="text-maroon-400 opacity-0 transition hover:text-maroon-700 group-hover/proj:opacity-100"
-                >
-                  ✕
-                </button>
-              ) : null}
-            </span>
-          ))}
-
-          {isAdmin ? (
-            addingProject ? (
-              <input
-                autoFocus
-                value={projectDraft}
-                onChange={(e) => setProjectDraft(e.target.value)}
-                onBlur={commitProject}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') commitProject()
-                  if (e.key === 'Escape') {
-                    setProjectDraft('')
-                    setAddingProject(false)
-                  }
-                }}
-                placeholder="Project…"
-                className="w-28 rounded-full border border-navy-200 bg-white px-2 py-0.5 text-[10px] text-navy-900 outline-none focus:border-sunburst-500"
-              />
-            ) : (
-              <button
-                onClick={() => setAddingProject(true)}
-                className="rounded-full border border-dashed border-navy-200 px-2 py-0.5 text-[10px] font-semibold text-navy-400 transition hover:border-sunburst-400 hover:text-sunburst-600"
-              >
-                + Project
-              </button>
-            )
-          ) : null}
+        {/* People summary — derived from the projects' assigned interns */}
+        <div className="mt-2 flex items-center gap-2">
+          {members.length > 0 ? (
+            <AvatarStack interns={members} max={8} />
+          ) : (
+            <span className="text-[11px] text-ink-3">No people yet</span>
+          )}
         </div>
       </div>
 
-      {/* Members (compact table) */}
+      {/* Projects */}
       <div className="flex-1">
-        {members.length === 0 ? (
-          <div
-            className={`m-2.5 flex items-center justify-center rounded-lg border border-dashed py-4 text-center text-[11px] transition ${
-              isMemberDropTarget
-                ? 'border-sunburst-400 text-sunburst-600'
-                : 'border-navy-200 text-navy-400'
-            }`}
-          >
-            {isMemberDropTarget ? 'Drop to add here' : 'No members yet'}
+        {projects.length === 0 ? (
+          <div className="m-2.5 flex items-center justify-center rounded-lg border border-dashed border-line-2 py-4 text-center text-[11px] text-ink-3">
+            No projects in this group yet
           </div>
         ) : (
-          members.map((m) => (
-            <MemberRow key={m.id} member={m} api={api} isAdmin={isAdmin} />
+          projects.map((p) => (
+            <ProjectRow
+              key={p.id}
+              project={p}
+              devs={internsByProject.get(p.id) ?? []}
+              teams={api.teams}
+              isAdmin={isAdmin}
+              onMove={(teamId) => api.setProjectTeam(p.id, teamId)}
+            />
           ))
         )}
       </div>
 
-      {/* Add member */}
+      {/* Add project */}
       {isAdmin ? (
-        <div className="border-t border-navy-100 p-2">
+        <div className="border-t border-line p-2">
           <button
-            ref={addMemberBtnRef}
-            onClick={() => setAddMemberOpen((v) => !v)}
-            className="flex w-full items-center justify-center gap-1 rounded-lg border border-dashed border-navy-200 py-1.5 text-[11px] font-semibold text-navy-400 transition hover:border-sunburst-400 hover:text-sunburst-600"
+            ref={addBtnRef}
+            onClick={() => setAddOpen((v) => !v)}
+            className="flex w-full items-center justify-center gap-1 rounded-lg border border-dashed border-line-2 py-1.5 text-[11px] font-semibold text-ink-3 transition hover:border-sunburst-400 hover:text-sunburst-600"
           >
-            <span className="text-sm leading-none">＋</span> Add member
+            <span className="text-sm leading-none">＋</span> Add project
           </button>
-          {addMemberOpen ? (
-            <AddMemberPopover
-              anchorEl={addMemberBtnRef.current}
-              teamMembers={members}
-              onPick={(intern) => api.addMember(team.id, intern)}
-              onClose={() => setAddMemberOpen(false)}
+          {addOpen ? (
+            <AddProjectPopover
+              anchorEl={addBtnRef.current}
+              candidates={candidates}
+              teamName={team.name}
+              onPick={(projectId) => api.setProjectTeam(projectId, team.id)}
+              onClose={() => setAddOpen(false)}
             />
           ) : null}
         </div>
