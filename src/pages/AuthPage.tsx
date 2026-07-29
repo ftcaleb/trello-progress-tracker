@@ -101,7 +101,7 @@ export function AuthPage() {
           <img
             src="/logo-dark.png"
             alt="Melsoft Academy"
-            className="h-8 w-auto object-contain"
+            className="h-16 w-auto object-contain"
           />
         </div>
 
