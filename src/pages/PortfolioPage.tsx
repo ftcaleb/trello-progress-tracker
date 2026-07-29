@@ -88,8 +88,9 @@ export function PortfolioPage() {
                 progress={
                   progressByProject.get(project.id) ?? {
                     currentPhase: null,
-                    phaseIndex: -1,
-                    totalPhases: 4,
+                    completedPhases: 0,
+                    totalPhases: 0,
+                    percent: 0,
                     started: false,
                   }
                 }

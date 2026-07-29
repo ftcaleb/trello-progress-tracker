@@ -8,6 +8,7 @@ import type {
   PhaseReport,
   Project,
   ProjectIntern,
+  TaskStatus,
   Team,
 } from '../types'
 
@@ -15,6 +16,7 @@ interface TaskLite {
   id: string
   project_id: string
   phase_id: string
+  status: TaskStatus
 }
 
 interface PortfolioState {
@@ -40,9 +42,14 @@ function msg(e: unknown): string {
 }
 
 export interface ProjectProgress {
+  /** The active phase to work on next (first incomplete); null when all done. */
   currentPhase: Phase | null
-  phaseIndex: number // 0-based index of current phase, -1 if not started
+  /** Phases where every task is approved. */
+  completedPhases: number
   totalPhases: number
+  /** completedPhases / totalPhases, 0–100 (rounded). */
+  percent: number
+  /** True once the project has any task at all. */
   started: boolean
 }
 
@@ -64,7 +71,7 @@ export function usePortfolio() {
           supabase.from('projects').select('*').order('name'),
           supabase.from('phases').select('*').order('position'),
           supabase.from('project_interns').select('*'),
-          supabase.from('tasks').select('id, project_id, phase_id'),
+          supabase.from('tasks').select('id, project_id, phase_id, status'),
           supabase.from('phase_reports').select('*'),
           supabase.from('teams').select('*').order('position'),
         ])
@@ -108,28 +115,49 @@ export function usePortfolio() {
     return map
   }, [phases])
 
-  const phasesWithTasks = useMemo(() => {
-    const set = new Set<string>()
-    for (const t of tasks) set.add(t.phase_id)
-    return set
+  // Tasks grouped by phase — the basis for phase completion.
+  const tasksByPhase = useMemo(() => {
+    const map = new Map<string, TaskLite[]>()
+    for (const t of tasks) {
+      const list = map.get(t.phase_id) ?? []
+      list.push(t)
+      map.set(t.phase_id, list)
+    }
+    return map
   }, [tasks])
 
   const progressByProject = useMemo(() => {
+    // A phase is complete when it has tasks and every one is approved.
+    const isComplete = (phaseId: string) => {
+      const list = tasksByPhase.get(phaseId)
+      return Boolean(list && list.length > 0 && list.every((t) => t.status === 'approved'))
+    }
+
     const map = new Map<string, ProjectProgress>()
     for (const project of projects) {
       const projectPhases = phasesByProject.get(project.id) ?? []
-      const current = projectPhases.find((ph) => phasesWithTasks.has(ph.id))
+      const total = projectPhases.length
+      const completed = projectPhases.reduce(
+        (n, ph) => n + (isComplete(ph.id) ? 1 : 0),
+        0,
+      )
+      const started = projectPhases.some(
+        (ph) => (tasksByPhase.get(ph.id)?.length ?? 0) > 0,
+      )
+      const firstIncomplete = projectPhases.find((ph) => !isComplete(ph.id))
+      const percent = total > 0 ? Math.round((completed / total) * 100) : 0
+
       map.set(project.id, {
-        currentPhase: current ?? null,
-        phaseIndex: current
-          ? projectPhases.findIndex((ph) => ph.id === current.id)
-          : -1,
-        totalPhases: projectPhases.length,
-        started: Boolean(current),
+        // When everything is approved there's no active phase.
+        currentPhase: percent === 100 ? null : (firstIncomplete ?? null),
+        completedPhases: completed,
+        totalPhases: total,
+        percent,
+        started,
       })
     }
     return map
-  }, [projects, phasesByProject, phasesWithTasks])
+  }, [projects, phasesByProject, tasksByPhase])
 
   const internsByProject = useMemo(() => {
     const byId = new Map(interns.map((i) => [i.id, i]))

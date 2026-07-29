@@ -41,8 +41,14 @@ export function ProjectCardTile({
   const menuBtnRef = useRef<HTMLButtonElement>(null)
   const assignedIds = new Set(interns.map((i) => i.id))
 
-  const total = progress.totalPhases || 4
-  const filledUpTo = progress.started ? progress.phaseIndex + 1 : 0
+  const total = progress.totalPhases
+  const completed = progress.completedPhases
+  const phaseLabel =
+    progress.percent === 100 && total > 0
+      ? 'All phases approved'
+      : progress.started && progress.currentPhase
+        ? `${progress.currentPhase.name} · Week ${progress.currentPhase.week_number}`
+        : 'Not started'
   const group = teams.find((t) => t.id === project.team_id) ?? null
 
   const closeMenu = () => {
@@ -220,27 +226,40 @@ export function ProjectCardTile({
 
       {/* Progress */}
       <div className="mt-4">
-        <div className="mb-1.5 flex items-center justify-between text-xs">
-          <span className="font-semibold text-ink-2">
-            {progress.started && progress.currentPhase
-              ? `${progress.currentPhase.name} · Week ${progress.currentPhase.week_number}`
-              : 'Not started'}
+        <div className="mb-2 flex items-center justify-between gap-3">
+          <span
+            className="line-clamp-2 text-xs font-semibold leading-snug text-ink-2"
+            title={phaseLabel}
+          >
+            {phaseLabel}
           </span>
-          <span className="text-ink-3">
-            {progress.started ? `${filledUpTo}/${total}` : `0/${total}`}
+          <span className="shrink-0 text-sm font-bold tabular-nums leading-none text-ink">
+            {progress.percent}
+            <span className="text-[10px] font-semibold text-ink-3">%</span>
           </span>
         </div>
-        <div className="flex gap-1">
-          {Array.from({ length: total }).map((_, i) => (
-            <span
-              key={i}
-              className={`h-1.5 flex-1 rounded-full transition-colors ${
-                i < filledUpTo
-                  ? 'bg-gradient-to-r from-sunburst-400 to-sunburst-600'
-                  : 'bg-surface-3'
-              }`}
-            />
-          ))}
+        <div
+          className="flex gap-1"
+          role="progressbar"
+          aria-valuenow={progress.percent}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label={`Project progress: ${completed} of ${total} phases approved`}
+        >
+          {total > 0 ? (
+            Array.from({ length: total }).map((_, i) => (
+              <span
+                key={i}
+                className={`h-1.5 flex-1 rounded-full transition-colors ${
+                  i < completed
+                    ? 'bg-gradient-to-r from-sunburst-400 to-sunburst-600'
+                    : 'bg-surface-3'
+                }`}
+              />
+            ))
+          ) : (
+            <span className="h-1.5 flex-1 rounded-full bg-surface-3" />
+          )}
         </div>
       </div>
 
