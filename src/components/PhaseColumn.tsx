@@ -4,7 +4,7 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import type { Phase, Task } from '../types'
 import type { UseProjectBoard } from '../hooks/useProjectBoard'
 import { TaskCard } from './TaskCard'
-import { FileTextIcon, LockIcon } from './icons'
+import { CheckIcon, FileTextIcon, LockIcon } from './icons'
 
 export function PhaseColumn({
   phase,
@@ -85,18 +85,12 @@ export function PhaseColumn({
           : showValidDrop
             ? 'border-sunburst-400 ring-2 ring-sunburst-400/50'
             : cleared
-              ? 'border-accent-ring'
+              ? 'border-st-approved'
               : 'border-line'
       } ${locked ? 'opacity-50' : ''} ${shaking ? 'animate-shake' : ''}`}
     >
       {/* Header */}
-      <div
-        className={`rounded-t-2xl border-b px-3.5 py-3 transition ${
-          cleared
-            ? 'border-accent-ring bg-accent-wash'
-            : 'border-line bg-surface-3'
-        }`}
-      >
+      <div className="rounded-t-2xl border-b border-line bg-surface-3 px-3.5 py-3 transition">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
             {editing && isAdmin ? (
@@ -119,6 +113,13 @@ export function PhaseColumn({
                 {locked ? (
                   <span title="Locked — clear this phase first" className="text-ink-3">
                     <LockIcon size={13} />
+                  </span>
+                ) : cleared ? (
+                  <span
+                    title="Phase cleared — all tasks approved"
+                    className="text-st-approved-fg"
+                  >
+                    <CheckIcon size={14} />
                   </span>
                 ) : null}
                 <span
@@ -196,35 +197,30 @@ export function PhaseColumn({
           </div>
         </div>
 
-        {/* Cleared state / advance — admin only */}
+        {/* Advance / report — shown once every task in the phase is approved */}
         {cleared ? (
-          <div className="mt-2.5 flex items-center justify-between gap-2">
-            <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-[11px] font-semibold text-accent-ink shadow-e1">
-              Phase cleared ✓
-            </span>
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={onOpenReport}
-                title={hasReport ? 'View phase report' : 'Generate phase report'}
-                className="inline-flex items-center gap-1 rounded-lg border border-line-2 bg-surface px-2 py-1 text-xs font-semibold text-ink-2 shadow-e1 transition hover:border-sunburst-400 hover:text-sunburst-600"
-              >
-                <FileTextIcon size={13} /> Report
-              </button>
-              {isAdmin ? (
-                isLast ? (
-                  <span className="text-[11px] font-medium text-ink-3">
-                    Final phase
-                  </span>
-                ) : (
-                  <button
-                    onClick={onAdvance}
-                    className="rounded-lg bg-gradient-to-r from-sunburst-500 to-maroon-600 px-2.5 py-1 text-xs font-semibold text-white shadow-e1 transition hover:brightness-110"
-                  >
-                    Advance phase →
-                  </button>
-                )
-              ) : null}
-            </div>
+          <div className="mt-3 flex items-center gap-2">
+            <button
+              onClick={onOpenReport}
+              title={hasReport ? 'View phase report' : 'Generate phase report'}
+              className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-line-2 bg-surface px-2 py-1.5 text-xs font-semibold text-ink-2 transition hover:border-accent-ring hover:text-accent"
+            >
+              <FileTextIcon size={13} /> Report
+            </button>
+            {isAdmin ? (
+              isLast ? (
+                <span className="flex-1 text-center text-[11px] font-medium text-ink-3">
+                  Final phase
+                </span>
+              ) : (
+                <button
+                  onClick={onAdvance}
+                  className="inline-flex flex-1 items-center justify-center gap-1 rounded-lg bg-accent px-2 py-1.5 text-xs font-semibold text-accent-ink transition hover:bg-accent-hover"
+                >
+                  Advance phase →
+                </button>
+              )
+            ) : null}
           </div>
         ) : null}
       </div>

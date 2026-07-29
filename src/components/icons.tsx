@@ -81,6 +81,14 @@ export function FileTextIcon({ size = 16, className, style }: IconProps) {
   )
 }
 
+export function CheckIcon({ size = 16, className, style }: IconProps) {
+  return (
+    <svg {...base(size)} className={className} style={style}>
+      <path d="M5 12.5l4.5 4.5L19 7" />
+    </svg>
+  )
+}
+
 export function AlertTriangleIcon({ size = 16, className, style }: IconProps) {
   return (
     <svg {...base(size)} className={className} style={style}>

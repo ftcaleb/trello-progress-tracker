@@ -6,8 +6,7 @@ import { AlertTriangleIcon } from './icons'
 
 // Visual identity per status.
 const triggerClass: Record<TaskStatus, string> = {
-  approved:
-    'bg-gradient-to-r from-sunburst-500 to-maroon-600 text-white border-transparent',
+  approved: 'bg-st-approved-bg text-st-approved-fg border-st-approved',
   in_progress: 'bg-surface text-ink-2 border-line-2',
   blocked: 'bg-st-cancelled-bg text-st-cancelled-fg border-st-cancelled',
 }
@@ -149,7 +148,7 @@ export function StatusSelect({
                   <span
                     className={`flex h-4 w-4 items-center justify-center rounded-full text-[10px] ${
                       status === 'approved'
-                        ? 'bg-gradient-to-r from-sunburst-500 to-maroon-600 text-white'
+                        ? 'bg-st-approved-bg text-st-approved-fg'
                         : status === 'blocked'
                           ? 'bg-st-cancelled-bg text-st-cancelled-fg'
                           : 'bg-surface-3 text-ink-3'
@@ -159,7 +158,7 @@ export function StatusSelect({
                   </span>
                   {STATUS_LABELS[status]}
                   {status === value ? (
-                    <span className="ml-auto text-sunburst-500">●</span>
+                    <span className="ml-auto text-accent">●</span>
                   ) : null}
                 </button>
               ))}
