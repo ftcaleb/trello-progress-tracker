@@ -59,6 +59,16 @@ export interface PublicProfile {
   moodle_username: string | null
 }
 
+export interface ProjectDocument {
+  id: string
+  project_id: string
+  storage_path: string
+  file_name: string
+  file_size: number | null
+  uploaded_by: string | null
+  created_at: string
+}
+
 export interface PhaseReport {
   id: string
   project_id: string

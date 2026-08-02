@@ -118,6 +118,26 @@ export function TrashIcon({ size = 16, className, style }: IconProps) {
   )
 }
 
+export function UploadIcon({ size = 16, className, style }: IconProps) {
+  return (
+    <svg {...base(size)} className={className} style={style}>
+      <path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
+      <path d="M12 15V4" />
+      <path d="M8 8l4-4 4 4" />
+    </svg>
+  )
+}
+
+export function ExternalLinkIcon({ size = 16, className, style }: IconProps) {
+  return (
+    <svg {...base(size)} className={className} style={style}>
+      <path d="M14 4h6v6" />
+      <path d="M20 4l-8 8" />
+      <path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5" />
+    </svg>
+  )
+}
+
 export function DownloadIcon({ size = 16, className, style }: IconProps) {
   return (
     <svg {...base(size)} className={className} style={style}>

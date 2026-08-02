@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { AlertTriangleIcon, SettingsIcon } from '../components/icons'
+import { AlertTriangleIcon, FileTextIcon, SettingsIcon } from '../components/icons'
+import { useProjectDocuments } from '../hooks/useProjectDocuments'
+import { RoadmapModal } from '../components/RoadmapModal'
 import {
   DndContext,
   DragOverlay,
@@ -30,6 +32,8 @@ export function BoardPage() {
   const toast = useToast()
   const { isAdmin, session } = useAuth()
   const currentUserId = session?.user?.id ?? null
+  const roadmap = useProjectDocuments(id)
+  const [roadmapOpen, setRoadmapOpen] = useState(false)
 
   const {
     project,
@@ -268,6 +272,18 @@ export function BoardPage() {
           ) : (
             <span className="text-xs text-ink-3">No team assigned</span>
           )}
+          <button
+            onClick={() => setRoadmapOpen(true)}
+            title="Detailed roadmap PDFs for this project"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-line-2 px-3 py-1.5 text-sm font-medium text-ink-2 transition hover:bg-surface-2"
+          >
+            <FileTextIcon size={15} /> Roadmap
+            {roadmap.documents.length > 0 ? (
+              <span className="ml-0.5 rounded-full bg-surface-3 px-1.5 text-[10px] font-bold text-ink-2">
+                {roadmap.documents.length}
+              </span>
+            ) : null}
+          </button>
           {isAdmin ? (
             <button
               onClick={() => setSettingsOpen(true)}
@@ -342,6 +358,15 @@ export function BoardPage() {
           project={project}
           onSave={board.updateSettings}
           onClose={() => setSettingsOpen(false)}
+        />
+      ) : null}
+
+      {roadmapOpen ? (
+        <RoadmapModal
+          docs={roadmap}
+          isAdmin={isAdmin}
+          currentUserId={currentUserId}
+          onClose={() => setRoadmapOpen(false)}
         />
       ) : null}
 
