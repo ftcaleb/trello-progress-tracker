@@ -313,39 +313,6 @@ export function useProjectBoard(projectId: string) {
     [state, toast],
   )
 
-  /** Move all tasks of a phase to the next phase; reset their status. */
-  const advancePhase = useCallback(
-    async (phaseId: string) => {
-      const idx = orderedPhases.findIndex((p) => p.id === phaseId)
-      if (idx < 0 || idx >= orderedPhases.length - 1) return
-      const target = orderedPhases[idx + 1]
-      const moving = (tasksByPhase.get(phaseId) ?? []).slice()
-      if (moving.length === 0) return
-
-      let cursor = (tasksByPhase.get(target.id) ?? []).reduce(
-        (m, t) => Math.max(m, t.position + 1),
-        0,
-      )
-      const movingIds = new Set(moving.map((t) => t.id))
-      const next = tasks.map((t) => {
-        if (!movingIds.has(t.id)) return t
-        const order = moving.findIndex((m) => m.id === t.id)
-        return {
-          ...t,
-          phase_id: target.id,
-          position: cursor + order,
-          status: 'in_progress' as TaskStatus,
-        }
-      })
-      cursor += moving.length
-      await commitTasks(next, 'Could not advance phase')
-      toast.success(
-        `Advanced ${moving.length} task${moving.length === 1 ? '' : 's'} to ${target.name}.`,
-      )
-    },
-    [orderedPhases, tasksByPhase, tasks, commitTasks, toast],
-  )
-
   // ---- Phase mutations ----------------------------------------------------
   const addPhase = useCallback(
     async (rawName?: string) => {
@@ -747,7 +714,6 @@ export function useProjectBoard(projectId: string) {
     setTaskStatus,
     deleteTask,
     commitTasks,
-    advancePhase,
     // phase mutations
     addPhase,
     renamePhase,

@@ -11,11 +11,9 @@ export function PhaseColumn({
   tasks,
   board,
   cleared,
-  isLast,
   locked,
   dragActive,
   shaking,
-  onAdvance,
   onOpenReport,
   hasReport,
   isAdmin = false,
@@ -25,11 +23,9 @@ export function PhaseColumn({
   tasks: Task[]
   board: UseProjectBoard
   cleared: boolean
-  isLast: boolean
   locked: boolean
   dragActive: boolean
   shaking: boolean
-  onAdvance: () => void
   onOpenReport: () => void
   hasReport: boolean
   isAdmin?: boolean
@@ -197,30 +193,16 @@ export function PhaseColumn({
           </div>
         </div>
 
-        {/* Advance / report — shown once every task in the phase is approved */}
+        {/* Report — surfaced once every task in the phase is approved */}
         {cleared ? (
-          <div className="mt-3 flex items-center gap-2">
+          <div className="mt-3">
             <button
               onClick={onOpenReport}
               title={hasReport ? 'View phase report' : 'Generate phase report'}
-              className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-line-2 bg-surface px-2 py-1.5 text-xs font-semibold text-ink-2 transition hover:border-accent-ring hover:text-accent"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-line-2 bg-surface px-3 py-1.5 text-xs font-semibold text-ink-2 transition hover:border-accent-ring hover:text-accent"
             >
               <FileTextIcon size={13} /> Report
             </button>
-            {isAdmin ? (
-              isLast ? (
-                <span className="flex-1 text-center text-[11px] font-medium text-ink-3">
-                  Final phase
-                </span>
-              ) : (
-                <button
-                  onClick={onAdvance}
-                  className="inline-flex flex-1 items-center justify-center gap-1 rounded-lg bg-accent px-2 py-1.5 text-xs font-semibold text-accent-ink transition hover:bg-accent-hover"
-                >
-                  Advance phase →
-                </button>
-              )
-            ) : null}
           </div>
         ) : null}
       </div>

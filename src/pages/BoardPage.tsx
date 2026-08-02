@@ -16,7 +16,7 @@ import { arrayMove } from '@dnd-kit/sortable'
 import { useProjectBoard } from '../hooks/useProjectBoard'
 import { useAuth } from '../hooks/useAuth'
 import { useToast } from '../components/Toast'
-import { STATUS_LABELS, type Task } from '../types'
+import { STATUS_LABELS, type Task, type TaskStatus } from '../types'
 import { PhaseColumn } from '../components/PhaseColumn'
 import { SettingsModal } from '../components/SettingsModal'
 import { ReportModal } from '../components/ReportModal'
@@ -42,25 +42,18 @@ export function BoardPage() {
     loadError,
     reload,
     commitTasks,
-    advancePhase,
     addPhase,
   } = board
 
   const [containers, setContainers] = useState<Containers>({})
   const [activeId, setActiveId] = useState<string | null>(null)
   const activeIdRef = useRef<string | null>(null)
-  const dragSource = useRef<{ phaseId: string; cleared: boolean } | null>(null)
+  const dragSource = useRef<{ phaseId: string; status: TaskStatus } | null>(null)
   const [shakePhaseId, setShakePhaseId] = useState<string | null>(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [reportPhaseId, setReportPhaseId] = useState<string | null>(null)
 
   const taskById = useMemo(() => new Map(tasks.map((t) => [t.id, t])), [tasks])
-  const phasePos = useMemo(() => {
-    const m = new Map<string, number>()
-    phases.forEach((p, i) => m.set(p.id, i))
-    return m
-  }, [phases])
-
   const buildContainers = useCallback((): Containers => {
     const next: Containers = {}
     for (const ph of phases) {
@@ -84,12 +77,21 @@ export function BoardPage() {
     return Object.keys(source).find((key) => source[key].includes(cid))
   }
 
-  const isLockedTarget = (phaseId: string): boolean => {
+  // A cross-phase move is blocked when the card is Approved (frozen in its
+  // phase as a completed record) OR the target phase is cleared/green (a
+  // sealed record that can't receive cards). Same-phase reordering is fine.
+  const moveBlocked = (targetPhaseId: string): boolean => {
     const src = dragSource.current
-    if (!src || src.cleared) return false
-    const srcPos = phasePos.get(src.phaseId) ?? -1
-    const tgtPos = phasePos.get(phaseId) ?? -1
-    return tgtPos > srcPos
+    if (!src || targetPhaseId === src.phaseId) return false
+    return src.status === 'approved' || isPhaseCleared(targetPhaseId)
+  }
+
+  // Visual only: a cleared phase (other than the source) shows as a sealed
+  // drop target during a drag.
+  const isSealedTarget = (phaseId: string): boolean => {
+    const src = dragSource.current
+    if (!src || phaseId === src.phaseId) return false
+    return isPhaseCleared(phaseId)
   }
 
   const onDragStart = (event: DragStartEvent) => {
@@ -100,7 +102,7 @@ export function BoardPage() {
     if (task) {
       dragSource.current = {
         phaseId: task.phase_id,
-        cleared: isPhaseCleared(task.phase_id),
+        status: task.status,
       }
     }
   }
@@ -115,8 +117,8 @@ export function BoardPage() {
       const activeC = findContainer(aId, prev)
       const overC = findContainer(oId, prev)
       if (!activeC || !overC || activeC === overC) return prev
-      // Block live entry into a locked (forward) column.
-      if (isLockedTarget(overC)) return prev
+      // Block live entry into a phase this card isn't allowed to move into.
+      if (moveBlocked(overC)) return prev
 
       const activeItems = prev[activeC]
       const overItems = prev[overC]
@@ -171,24 +173,28 @@ export function BoardPage() {
       return
     }
 
-    const srcPos = phasePos.get(src.phaseId) ?? -1
-    const overPos = phasePos.get(overContainer) ?? -1
-
-    // Phase gate: forward move blocked unless the source phase is cleared.
-    if (overPos > srcPos && !src.cleared) {
-      const notApproved = (tasksByPhase.get(src.phaseId) ?? []).filter(
-        (t) => t.status !== 'approved',
-      ).length
-      const phaseName =
-        phases.find((p) => p.id === src.phaseId)?.name ?? 'This phase'
-      triggerShake(src.phaseId)
-      toast.error(
-        `${phaseName} not cleared — ${notApproved} task${
-          notApproved === 1 ? '' : 's'
-        } not yet approved.`,
-      )
-      setContainers(buildContainers())
-      return
+    // Per-card gate: Approved cards stay in their phase (frozen record), and a
+    // cleared/green phase is sealed and can't receive cards. Same-phase
+    // reordering is always allowed.
+    if (overContainer !== src.phaseId) {
+      if (src.status === 'approved') {
+        triggerShake(src.phaseId)
+        toast.error(
+          "Approved cards stay in their phase — they're your record of completed work.",
+        )
+        setContainers(buildContainers())
+        return
+      }
+      if (isPhaseCleared(overContainer)) {
+        const targetName =
+          phases.find((p) => p.id === overContainer)?.name ?? 'That phase'
+        triggerShake(overContainer)
+        toast.error(
+          `${targetName} is complete and sealed — cards can't be moved into it.`,
+        )
+        setContainers(buildContainers())
+        return
+      }
     }
 
     // Accepted — finalize ordering.
@@ -224,18 +230,6 @@ export function BoardPage() {
     )
     if (name === null) return
     void addPhase(name)
-  }
-
-  const handleAdvance = (phaseId: string) => {
-    const list = tasksByPhase.get(phaseId) ?? []
-    const target = phases[phases.findIndex((p) => p.id === phaseId) + 1]
-    if (!target) return
-    if (
-      window.confirm(
-        `Advance ${list.length} task${list.length === 1 ? '' : 's'} to ${target.name}? Statuses reset to In Progress.`,
-      )
-    )
-      void advancePhase(phaseId)
   }
 
   const activeTask = activeId ? taskById.get(activeId) : undefined
@@ -294,7 +288,7 @@ export function BoardPage() {
         onDragEnd={onDragEnd}
       >
         <div className="flex flex-1 items-stretch gap-4 overflow-x-auto fi-scroll p-5">
-          {phases.map((phase, idx) => {
+          {phases.map((phase) => {
             const ids = containers[phase.id] ?? []
             const columnTasks = ids
               .map((tid) => taskById.get(tid))
@@ -306,11 +300,9 @@ export function BoardPage() {
                 tasks={columnTasks}
                 board={board}
                 cleared={isPhaseCleared(phase.id)}
-                isLast={idx === phases.length - 1}
-                locked={dragActive && isLockedTarget(phase.id)}
+                locked={dragActive && isSealedTarget(phase.id)}
                 dragActive={dragActive}
                 shaking={shakePhaseId === phase.id}
-                onAdvance={() => handleAdvance(phase.id)}
                 onOpenReport={() => setReportPhaseId(phase.id)}
                 hasReport={board.reportsByPhase.has(phase.id)}
                 isAdmin={isAdmin}
